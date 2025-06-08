@@ -50,16 +50,36 @@ jobs:
       uses: actions/checkout@v4
 
     - name: Build Docker image
-      run: |
-        echo "FROM node:20-alpine" > Dockerfile
-        echo "WORKDIR /app" >> Dockerfile
-        echo "COPY package*.json ./" >> Dockerfile
-        echo "RUN npm ci --only=production" >> Dockerfile
-        echo "COPY dist/ ./dist/" >> Dockerfile
-        echo "EXPOSE 3000" >> Dockerfile
-        echo "CMD [\"npm\", \"start\"]" >> Dockerfile
-        docker build -t foss-vital:latest .
+      run: docker build -t foss-vital:${{ github.sha }} -t foss-vital:latest .
         
     - name: Test Docker image
       run: |
-        docker run --rm foss-vital:latest node -e "console.log('Docker build successful!')"
+        # Start container in background
+        docker run -d --name test-container -p 3000:3000 foss-vital:latest
+        
+        # Function to cleanup container
+        cleanup() {
+          echo "Cleaning up container..."
+          docker stop test-container 2>/dev/null || true
+          docker rm test-container 2>/dev/null || true
+        }
+        
+        # Set trap to cleanup on exit
+        trap cleanup EXIT
+        
+        # Wait for container to be ready and check health
+        timeout=30
+        while [ $timeout -gt 0 ]; do
+          if docker exec test-container node -e "fetch('http://localhost:3000/health').then(r => r.ok ? process.exit(0) : process.exit(1)).catch(() => process.exit(1))" 2>/dev/null; then
+            echo "Container is healthy!"
+            echo "Docker build and health check successful!"
+            exit 0
+          fi
+          echo "Waiting for container to be ready... ($timeout seconds left)"
+          sleep 2
+          timeout=$((timeout-2))
+        done
+        
+        echo "Container failed to become healthy"
+        docker logs test-container
+        exit 1
