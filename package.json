@@ -5,6 +5,7 @@
     "dev": "tsx watch src/index.ts",
     "build": "tsc",
     "start": "node dist/index.js",
+    "test": "./test-api.sh",
     "check": "biome check .",
     "format": "biome format ."
   },
