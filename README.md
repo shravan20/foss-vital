@@ -184,6 +184,51 @@ npm run check
 npm run format
 ```
 
+## Deployment
+
+### Vercel Deployment (Serverless)
+
+1. **Connect to Vercel**:
+   - Import your GitHub repository to Vercel
+   - Vercel will automatically detect the project configuration
+
+2. **Set Environment Variables** in Vercel Dashboard:
+   ```
+   NODE_ENV=production
+   GITHUB_TOKEN=your_github_token (optional but recommended)
+   CORS_ORIGINS=https://your-domain.com
+   ```
+
+3. **Deploy**:
+   - Push to `main` branch for automatic deployment
+   - Or deploy manually: `vercel --prod`
+
+**Vercel Endpoints**:
+- Health: `https://your-app.vercel.app/api/health`
+- API Info: `https://your-app.vercel.app/api/`
+
+### Docker Deployment (Full Functionality)
+
+For complete API functionality, use Docker:
+
+```bash
+# Production deployment
+docker build -t foss-vital .
+docker run -d -p 3000:3000 --name foss-vital \
+  -e NODE_ENV=production \
+  -e GITHUB_TOKEN=your_token \
+  foss-vital
+```
+
+### CI/CD Pipeline
+
+The project includes GitHub Actions workflow that:
+- Runs tests on multiple Node.js versions
+- Builds and tests Docker images
+- Deploys to Vercel on main branch merges
+
+For detailed deployment instructions, see [DEPLOYMENT.md](DEPLOYMENT.md).
+
 ## License
 
 MIT License - see [LICENSE](LICENSE) file for details.

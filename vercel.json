@@ -1,0 +1,13 @@
+{
+  "version": 2,
+  "name": "foss-vital",
+  "buildCommand": "npm run build",
+  "functions": {
+    "api/*.ts": {
+      "runtime": "nodejs20.x"
+    }
+  },
+  "env": {
+    "NODE_ENV": "production"
+  }
+}
