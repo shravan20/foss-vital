@@ -1,20 +1,22 @@
 {
   "version": 2,
-  "name": "foss-vital",
-  "buildCommand": "npm run build",
   "functions": {
-    "dist/src/index.js": {
-      "runtime": "nodejs20.x"
+    "api/index.ts": {
+      "runtime": "@vercel/node@3.0.22"
     }
   },
-  "rewrites": [
+  "routes": [
     {
-      "source": "/(.*)",
-      "destination": "/dist/src/index.js"
+      "src": "/api/(.*)",
+      "dest": "/api/index.ts"
+    },
+    {
+      "src": "/health",
+      "dest": "/api/index.ts"
+    },
+    {
+      "src": "/",
+      "dest": "/api/index.ts"
     }
-  ],
-  "env": {
-    "NODE_ENV": "production",
-    "VERCEL": "1"
-  }
+  ]
 }

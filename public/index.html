@@ -1,0 +1,65 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>FOSS Vital API</title>
+    <style>
+        body {
+            font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', sans-serif;
+            max-width: 800px;
+            margin: 50px auto;
+            padding: 20px;
+            line-height: 1.6;
+            color: #333;
+        }
+        .header {
+            text-align: center;
+            margin-bottom: 40px;
+        }
+        .endpoint {
+            background: #f5f5f5;
+            padding: 10px;
+            border-radius: 5px;
+            margin: 10px 0;
+            font-family: monospace;
+        }
+        .method {
+            color: #007acc;
+            font-weight: bold;
+        }
+    </style>
+</head>
+<body>
+    <div class="header">
+        <h1>🚀 FOSS Vital API</h1>
+        <p>GitHub API boilerplate with intelligent caching and health scoring</p>
+    </div>
+
+    <h2>Available Endpoints</h2>
+    
+    <div class="endpoint">
+        <span class="method">GET</span> /api/health
+    </div>
+    <div class="endpoint">
+        <span class="method">GET</span> /api/projects/:owner/:repo
+    </div>
+    <div class="endpoint">
+        <span class="method">GET</span> /api/projects/:owner/:repo/complete
+    </div>
+    <div class="endpoint">
+        <span class="method">GET</span> /api/projects/:owner/:repo/metrics
+    </div>
+    <div class="endpoint">
+        <span class="method">GET</span> /api/health/:owner/:repo
+    </div>
+    <div class="endpoint">
+        <span class="method">POST</span> /api/health/:owner/:repo/refresh
+    </div>
+    <div class="endpoint">
+        <span class="method">GET</span> /api/health/cache/stats
+    </div>
+
+    <p><strong>Example:</strong> <code>/api/projects/microsoft/vscode</code></p>
+</body>
+</html>

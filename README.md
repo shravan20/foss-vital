@@ -1,15 +1,26 @@
 # FOSS Vital
 
-Your FOSS project's health report - A clean API boilerplate for fetching GitHub repository data with intelligent caching and health scoring.
+Your FOSS project's health report - A clean, simple API for fetching GitHub repository data with intelligent caching and health scoring. **Successfully migrated from Hono to Express.js for reliable Vercel deployment!**
+
+## ✅ Migration Complete
+
+This project has been successfully converted from Hono.js to Express.js with the following improvements:
+
+- 🔄 **Migrated from Hono to Express.js** - More stable and widely supported
+- 🗑️ **Cleaned up dependencies** - Removed unnecessary packages (biome, hono)
+- 📁 **Consolidated routes** - All routes moved to single Express app file
+- 🚀 **Simplified deployment** - Works with standard Vercel Node.js runtime
+- 🧹 **Removed unnecessary files** - Cleaner project structure
 
 ## Features
 
-- 🚀 **Fast & Modern**: Built with Hono.js and TypeScript
+- 🚀 **Fast & Reliable**: Built with Express.js and TypeScript
 - 📊 **Health Scoring**: Comprehensive project health calculation based on activity, community, maintenance, and documentation
 - ⚡ **Smart Caching**: In-memory caching with TTL to minimize GitHub API calls
 - 🔧 **No Database**: System-level caching only, no database dependencies
 - 📈 **Rich Metrics**: Fetch detailed project metrics from GitHub API
 - 🌐 **REST API**: Clean, documented API endpoints
+- ⚡ **Easy Deployment**: One-command deployment to Vercel Functions
 
 ## API Endpoints
 
@@ -29,32 +40,22 @@ Your FOSS project's health report - A clean API boilerplate for fetching GitHub 
 
 ## Quick Start
 
-### Installation
+### Deploy to Vercel (Recommended)
 
+1. Clone and setup:
 ```bash
-# Clone the repository
 git clone https://github.com/your-username/foss-vital.git
 cd foss-vital
-
-# Install dependencies
 npm install
 ```
 
-### Configuration
-
-1. Copy the example environment file:
+2. Deploy to Vercel:
 ```bash
-cp .env.example .env
+npm run deploy
 ```
 
-2. (Optional) Add your GitHub token for higher rate limits:
-```bash
-GITHUB_TOKEN=your_github_personal_access_token_here
-```
+### Local Development
 
-### Development
-
-Start the development server:
 ```bash
 npm run dev
 ```

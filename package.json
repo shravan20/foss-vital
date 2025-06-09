@@ -4,23 +4,25 @@
   "description": "GitHub API boilerplate with intelligent caching and health scoring",
   "type": "module",
   "scripts": {
-    "dev": "tsx watch src/index.ts",
+    "dev": "tsc && node dist/api/index.js",
+    "dev:watch": "tsc --watch",
     "build": "tsc",
-    "start": "node dist/src/index.js",
-    "vercel-build": "npm run build",
-    "test": "./test-api.sh",
-    "check": "biome check .",
-    "format": "biome format ."
+    "start": "node dist/api/index.js",
+    "deploy": "vercel --prod"
   },
   "dependencies": {
-    "@hono/node-server": "^1.14.4",
-    "biome": "^0.3.3",
-    "hono": "^4.7.11"
+    "express": "^4.19.2",
+    "cors": "^2.8.5"
   },
   "devDependencies": {
     "@types/node": "^20.11.17",
+    "@types/express": "^4.17.21",
+    "@types/cors": "^2.8.17",
     "@vercel/node": "^3.2.29",
-    "tsx": "^4.7.1",
-    "typescript": "^5.8.3"
+    "typescript": "^5.8.3",
+    "vercel": "^37.0.0"
+  },
+  "engines": {
+    "node": "20.x"
   }
 }
