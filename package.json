@@ -1,11 +1,13 @@
 {
   "name": "foss-vital",
+  "version": "1.0.0",
+  "description": "GitHub API boilerplate with intelligent caching and health scoring",
   "type": "module",
   "scripts": {
     "dev": "tsx watch src/index.ts",
     "build": "tsc",
-    "start": "node dist/index.js",
-    "vercel-build": "tsc",
+    "start": "node dist/src/index.js",
+    "vercel-build": "npm run build",
     "test": "./test-api.sh",
     "check": "biome check .",
     "format": "biome format ."

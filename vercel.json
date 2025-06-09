@@ -3,11 +3,18 @@
   "name": "foss-vital",
   "buildCommand": "npm run build",
   "functions": {
-    "api/*.ts": {
+    "dist/src/index.js": {
       "runtime": "nodejs20.x"
     }
   },
+  "rewrites": [
+    {
+      "source": "/(.*)",
+      "destination": "/dist/src/index.js"
+    }
+  ],
   "env": {
-    "NODE_ENV": "production"
+    "NODE_ENV": "production",
+    "VERCEL": "1"
   }
 }

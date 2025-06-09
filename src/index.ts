@@ -1,5 +1,5 @@
 /**
- * FOSS Vital - GitHub API boilerplate with intelligent caching
+ * FOSS Vital - Unified API for both Docker and Vercel deployments
  */
 
 import { serve } from '@hono/node-server';
@@ -13,6 +13,7 @@ import { projectsRouter } from './routes/projects.js';
 import { healthRouter } from './routes/health.js';
 import { logger as appLogger } from './utils/logger.js';
 
+// Create the unified app
 const app = new Hono();
 
 // Middleware
@@ -31,6 +32,7 @@ app.get('/health', (c) => {
     timestamp: new Date().toISOString(),
     uptime: process.uptime(),
     version: '1.0.0',
+    environment: process.env.VERCEL ? 'vercel' : 'docker',
   });
 });
 
@@ -40,6 +42,7 @@ app.get('/', (c) => {
     name: 'FOSS Vital API',
     description: 'GitHub API boilerplate with intelligent caching and health scoring',
     version: '1.0.0',
+    environment: process.env.VERCEL ? 'vercel' : 'docker',
     endpoints: {
       health: '/health',
       projects: '/api/projects/:owner/:repo',
@@ -49,7 +52,6 @@ app.get('/', (c) => {
       refreshHealth: 'POST /api/health/:owner/:repo/refresh',
       cacheStats: '/api/health/cache/stats',
     },
-    documentation: 'https://github.com/your-username/foss-vital',
   });
 });
 
@@ -63,6 +65,16 @@ app.notFound((c) => {
     success: false,
     error: 'Not Found',
     message: 'The requested endpoint does not exist',
+    available_endpoints: {
+      health: '/health',
+      info: '/',
+      projects: '/api/projects/:owner/:repo',
+      projectComplete: '/api/projects/:owner/:repo/complete',
+      projectMetrics: '/api/projects/:owner/:repo/metrics',
+      projectHealth: '/api/health/:owner/:repo',
+      refreshHealth: 'POST /api/health/:owner/:repo/refresh',
+      cacheStats: '/api/health/cache/stats',
+    },
   }, 404);
 });
 
@@ -77,13 +89,18 @@ app.onError((err, c) => {
   }, 500);
 });
 
-// Start server
-serve({
-  fetch: app.fetch,
-  port: appConfig.port,
-}, (info) => {
-  appLogger.info(`🚀 FOSS Vital API is running on http://localhost:${info.port}`);
-  appLogger.info(`📊 Cache TTL: ${appConfig.cache.ttl}ms, Max Size: ${appConfig.cache.maxSize}`);
-  appLogger.info(`🔑 GitHub Token: ${appConfig.github.token ? 'Configured' : 'Not configured (rate limited)'}`);
-  appLogger.info(`🌍 Environment: ${appConfig.nodeEnv}`);
-});
+// Export the app for Vercel
+export default app;
+
+// Start server for Docker deployment
+if (!process.env.VERCEL) {
+  serve({
+    fetch: app.fetch,
+    port: appConfig.port,
+  }, (info) => {
+    appLogger.info(`🚀 FOSS Vital API is running on http://localhost:${info.port}`);
+    appLogger.info(`📊 Cache TTL: ${appConfig.cache.ttl}ms, Max Size: ${appConfig.cache.maxSize}`);
+    appLogger.info(`🔑 GitHub Token: ${appConfig.github.token ? 'Configured' : 'Not configured (rate limited)'}`);
+    appLogger.info(`🌍 Environment: Docker`);
+  });
+}

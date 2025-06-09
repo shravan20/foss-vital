@@ -102,7 +102,12 @@ Environment variables:
 ## Project Structure
 
 ```
-src/
+api/                         # Vercel serverless functions
+├── index.ts                 # Main API handler (simplified)
+├── health.ts               # Health check endpoint
+└── projects.ts             # Basic project info endpoint
+
+src/                         # Full application (Docker)
 ├── index.ts                 # Application entry point
 ├── config/
 │   └── app.ts              # Application configuration
@@ -119,6 +124,35 @@ src/
 └── utils/
     └── logger.ts           # Logging utility
 ```
+
+## Deployment Options
+
+### 1. Vercel Serverless (Quick Start)
+
+**Features**: Basic repository info, health checks
+**Limitations**: No health scoring, no caching, simplified API
+
+```bash
+# Automatic via GitHub integration
+git push origin main
+```
+
+**Endpoints**:
+- `GET /api/health` - Health check
+- `GET /api/projects/:owner/:repo` - Basic project info
+
+### 2. Docker Deployment (Full Features)
+
+**Features**: Complete API, health scoring, intelligent caching
+**Recommended for**: Production use, advanced features
+
+```bash
+# Build and run
+docker build -t foss-vital .
+docker run -p 3000:3000 foss-vital
+```
+
+**Endpoints**: All API endpoints with full functionality
 
 ## Building for Production
 

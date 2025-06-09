@@ -1,19 +1,43 @@
 # Deployment Guide
 
-## Vercel Deployment
+FOSS Vital supports two deployment approaches:
 
-This project is configured for deployment on Vercel with the following setup:
+1. **Vercel Serverless** - Simplified API with basic GitHub repository information
+2. **Docker** - Full-featured API with health scoring, caching, and all endpoints
+
+## Vercel Deployment (Serverless)
+
+### What's Included in Vercel Deployment
+
+The Vercel deployment provides a simplified version of the API with:
+
+- ✅ Health check endpoint (`/api/health`)
+- ✅ Basic repository information (`/api/projects/:owner/:repo`)
+- ✅ API information endpoint (`/api/`)
+- ❌ Health scoring (use Docker for this)
+- ❌ Intelligent caching (use Docker for this)
+- ❌ Advanced metrics (use Docker for this)
 
 ### Prerequisites
 
 1. **Vercel Account**: Sign up at [vercel.com](https://vercel.com)
 2. **GitHub Integration**: Connect your Vercel account to GitHub
 3. **Environment Variables**: Set up the following in Vercel dashboard:
+
    - `GITHUB_TOKEN` (optional) - GitHub Personal Access Token for higher rate limits
    - `NODE_ENV` - Set to `production`
-   - `CORS_ORIGINS` - Comma-separated list of allowed origins
-   - `CACHE_TTL` - Cache time-to-live in milliseconds (default: 300000)
-   - `CACHE_MAX_SIZE` - Maximum cache size (default: 1000)
+
+### Vercel API Endpoints
+
+- **Health Check**: `https://your-app.vercel.app/api/health`
+- **API Info**: `https://your-app.vercel.app/api/`
+- **Project Info**: `https://your-app.vercel.app/api/projects/:owner/:repo`
+
+Example:
+
+```bash
+curl https://your-app.vercel.app/api/projects/microsoft/typescript
+```
 
 ### GitHub Secrets for CI/CD
 
