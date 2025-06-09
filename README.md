@@ -1,16 +1,6 @@
 # FOSS Vital
 
-Your FOSS project's health report - A clean, simple API for fetching GitHub repository data with intelligent caching and health scoring. **Successfully migrated from Hono to Express.js for reliable Vercel deployment!**
-
-## ✅ Migration Complete
-
-This project has been successfully converted from Hono.js to Express.js with the following improvements:
-
-- 🔄 **Migrated from Hono to Express.js** - More stable and widely supported
-- 🗑️ **Cleaned up dependencies** - Removed unnecessary packages (biome, hono)
-- 📁 **Consolidated routes** - All routes moved to single Express app file
-- 🚀 **Simplified deployment** - Works with standard Vercel Node.js runtime
-- 🧹 **Removed unnecessary files** - Cleaner project structure
+Your FOSS project's health report - A clean, simple API for fetching GitHub repository data with intelligent caching and health scoring.
 
 ## Features
 
@@ -25,16 +15,19 @@ This project has been successfully converted from Hono.js to Express.js with the
 ## API Endpoints
 
 ### Projects
+
 - `GET /api/projects/:owner/:repo` - Get basic project information
 - `GET /api/projects/:owner/:repo/complete` - Get project with health data
 - `GET /api/projects/:owner/:repo/metrics` - Get detailed project metrics
 
 ### Health
+
 - `GET /api/health/:owner/:repo` - Get project health score
 - `POST /api/health/:owner/:repo/refresh` - Force refresh health calculation
 - `GET /api/health/cache/stats` - Get cache statistics
 
 ### System
+
 - `GET /` - API information
 - `GET /health` - Health check
 
@@ -43,6 +36,7 @@ This project has been successfully converted from Hono.js to Express.js with the
 ### Deploy to Vercel (Recommended)
 
 1. Clone and setup:
+
 ```bash
 git clone https://github.com/your-username/foss-vital.git
 cd foss-vital
@@ -50,6 +44,7 @@ npm install
 ```
 
 2. Deploy to Vercel:
+
 ```bash
 npm run deploy
 ```
@@ -139,6 +134,7 @@ git push origin main
 ```
 
 **Endpoints**:
+
 - `GET /api/health` - Health check
 - `GET /api/projects/:owner/:repo` - Basic project info
 
@@ -228,6 +224,7 @@ npm run format
    - Vercel will automatically detect the project configuration
 
 2. **Set Environment Variables** in Vercel Dashboard:
+
    ```
    NODE_ENV=production
    GITHUB_TOKEN=your_github_token (optional but recommended)
@@ -239,6 +236,7 @@ npm run format
    - Or deploy manually: `vercel --prod`
 
 **Vercel Endpoints**:
+
 - Health: `https://your-app.vercel.app/api/health`
 - API Info: `https://your-app.vercel.app/api/`
 
@@ -258,6 +256,7 @@ docker run -d -p 3000:3000 --name foss-vital \
 ### CI/CD Pipeline
 
 The project includes GitHub Actions workflow that:
+
 - Runs tests on multiple Node.js versions
 - Builds and tests Docker images
 - Deploys to Vercel on main branch merges
