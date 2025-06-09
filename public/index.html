@@ -12,43 +12,125 @@
             padding: 20px;
             line-height: 1.6;
             color: #333;
+            background: #fafafa;
+        }
+        .container {
+            background: white;
+            padding: 40px;
+            border-radius: 12px;
+            box-shadow: 0 2px 10px rgba(0,0,0,0.1);
         }
         .header {
             text-align: center;
             margin-bottom: 40px;
         }
+        .header h1 {
+            color: #2563eb;
+            margin-bottom: 10px;
+        }
         .endpoint {
-            background: #f5f5f5;
-            padding: 10px;
-            border-radius: 5px;
-            margin: 10px 0;
-            font-family: monospace;
+            background: #f8fafc;
+            padding: 12px 16px;
+            border-radius: 8px;
+            margin: 12px 0;
+            font-family: 'Monaco', 'Menlo', monospace;
+            border-left: 4px solid #2563eb;
         }
         .method {
-            color: #007acc;
+            color: #059669;
             font-weight: bold;
+            margin-right: 8px;
+        }
+        .method.post {
+            color: #dc2626;
+        }
+        .deploy-btn {
+            display: inline-block;
+            background: #000;
+            color: white;
+            padding: 12px 24px;
+            text-decoration: none;
+            border-radius: 6px;
+            margin: 20px 10px;
+            font-weight: 500;
+        }
+        .deploy-btn:hover {
+            background: #333;
+        }
+        .github-btn {
+            background: #24292e;
+        }
+        .section {
+            margin: 30px 0;
         }
     </style>
 </head>
 <body>
-    <div class="header">
-        <h1>🚀 FOSS Vital API</h1>
-        <p>GitHub API boilerplate with intelligent caching and health scoring</p>
-    </div>
+    <div class="container">
+        <div class="header">
+            <h1>FOSS Vital API</h1>
+            <p>Your FOSS project's health report - A clean, simple API for fetching GitHub repository data</p>
+            
+            <a href="https://vercel.com/new/clone?repository-url=https://github.com/shravan20/foss-vital" class="deploy-btn">
+                Deploy to Vercel
+            </a>
+            <a href="https://github.com/shravan20/foss-vital" class="deploy-btn github-btn">
+                View on GitHub
+            </a>
+        </div>
 
-    <h2>Available Endpoints</h2>
-    
-    <div class="endpoint">
-        <span class="method">GET</span> /api/health
+        <div class="section">
+            <h2>API Endpoints</h2>
+            
+            <div class="endpoint">
+                <span class="method">GET</span> / - API information
+            </div>
+            <div class="endpoint">
+                <span class="method">GET</span> /health - Health check
+            </div>
+            <div class="endpoint">
+                <span class="method">GET</span> /api/projects/:owner/:repo - Basic project info
+            </div>
+            <div class="endpoint">
+                <span class="method">GET</span> /api/projects/:owner/:repo/complete - Project with health data
+            </div>
+            <div class="endpoint">
+                <span class="method">GET</span> /api/projects/:owner/:repo/metrics - Detailed metrics
+            </div>
+            <div class="endpoint">
+                <span class="method">GET</span> /api/health/:owner/:repo - Project health score
+            </div>
+            <div class="endpoint">
+                <span class="method post">POST</span> /api/health/:owner/:repo/refresh - Refresh health calculation
+            </div>
+            <div class="endpoint">
+                <span class="method">GET</span> /api/health/cache/stats - Cache statistics
+            </div>
+        </div>
+
+        <div class="section">
+            <h2>Quick Examples</h2>
+            <div class="endpoint">
+                curl "https://your-deployment.vercel.app/api/projects/facebook/react"
+            </div>
+            <div class="endpoint">
+                curl "https://your-deployment.vercel.app/api/health/facebook/react"
+            </div>
+        </div>
+
+        <div class="section">
+            <h2>Features</h2>
+            <ul>
+                <li>Fast & Reliable - Built with Express.js and TypeScript</li>
+                <li>Health Scoring - Comprehensive project health calculation</li>
+                <li>Smart Caching - In-memory caching to minimize API calls</li>
+                <li>No Database - Simple deployment with no dependencies</li>
+                <li>REST API - Clean, documented endpoints</li>
+            </ul>
+        </div>
     </div>
-    <div class="endpoint">
-        <span class="method">GET</span> /api/projects/:owner/:repo
-    </div>
-    <div class="endpoint">
-        <span class="method">GET</span> /api/projects/:owner/:repo/complete
-    </div>
-    <div class="endpoint">
-        <span class="method">GET</span> /api/projects/:owner/:repo/metrics
+</body>
+</html>
     </div>
     <div class="endpoint">
         <span class="method">GET</span> /api/health/:owner/:repo

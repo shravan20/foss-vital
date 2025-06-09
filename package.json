@@ -1,14 +1,14 @@
 {
   "name": "foss-vital",
   "version": "1.0.0",
-  "description": "GitHub API boilerplate with intelligent caching and health scoring",
+  "description": "Your FOSS project's health report - A clean, simple API for fetching GitHub repository data",
   "type": "module",
   "scripts": {
     "dev": "tsc && node dist/api/index.js",
-    "dev:watch": "tsc --watch",
     "build": "tsc",
     "start": "node dist/api/index.js",
-    "deploy": "vercel --prod"
+    "deploy": "vercel --prod",
+    "preview": "vercel dev"
   },
   "dependencies": {
     "express": "^4.19.2",
