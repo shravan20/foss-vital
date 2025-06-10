@@ -64,7 +64,22 @@ router.get('/:owner/:repo/metrics', async (req: Request, res: Response) => {
 
 // Get project card metrics (SVG)
 router.get('/:owner/:repo/card-metrics', async (req: Request, res: Response) => {
-  let response = `<?xml version="1.0" encoding="UTF-8"?>
+  try {
+    const { owner, repo } = req.params;
+
+    // Static data for demonstration - can be replaced with actual project data
+    const staticData = {
+      stars: '236k',
+      forks: '48,697',
+      openIssues: '1,089',
+      watchers: '6,733',
+      contributors: '1,933',
+      buildStatus: 'Passing',
+      commitsWeek: '28',
+      prsMerged: '74'
+    };
+
+    let response = `<?xml version="1.0" encoding="UTF-8"?>
     <svg xmlns="http://www.w3.org/2000/svg" xmlns:xlink="http://www.w3.org/1999/xlink" width="900" height="1150" viewBox="0 0 900 1150">
       <defs>
         <style><![CDATA[
@@ -109,7 +124,7 @@ router.get('/:owner/:repo/card-metrics', async (req: Request, res: Response) => 
       
       <!-- Header -->
       <text x="60" y="80" class="header-title">Project Health Dashboard</text>
-      <text x="60" y="105" class="header-subtitle">Comprehensive overview of project metrics and health indicators</text>
+      <text x="60" y="105" class="header-subtitle">${owner}/${repo} - Comprehensive overview of project metrics and health indicators</text>
       
       <!-- Code Quality Section -->
       <use href="#checkIcon" x="60" y="140" width="16" height="16" color="#374151"/>
@@ -119,7 +134,7 @@ router.get('/:owner/:repo/card-metrics', async (req: Request, res: Response) => 
       <g>
         <rect x="60" y="170" width="190" height="80" rx="8" class="card-success" stroke-width="1"/>
         <text x="75" y="190" class="card-label">Build Status</text>
-        <text x="75" y="215" class="card-value value-success" id="buildStatus">Passing</text>
+        <text x="75" y="215" class="card-value value-success">${staticData.buildStatus}</text>
         <use href="#checkIcon" x="225" y="180" width="14" height="14" color="#166534"/>
       </g>
       
@@ -180,7 +195,7 @@ router.get('/:owner/:repo/card-metrics', async (req: Request, res: Response) => 
       <g>
         <rect x="265" y="410" width="190" height="80" rx="8" class="card-info" stroke-width="1"/>
         <text x="280" y="430" class="card-label">Commits/Week</text>
-        <text x="280" y="455" class="card-value value-info" id="commitsWeek">28</text>
+        <text x="280" y="455" class="card-value value-info">${staticData.commitsWeek}</text>
       </g>
       
       <g>
@@ -192,14 +207,14 @@ router.get('/:owner/:repo/card-metrics', async (req: Request, res: Response) => 
       <g>
         <rect x="675" y="410" width="190" height="80" rx="8" class="card-success" stroke-width="1"/>
         <text x="690" y="430" class="card-label">PRs Merged</text>
-        <text x="690" y="455" class="card-value value-success" id="prsMerged">74</text>
+        <text x="690" y="455" class="card-value value-success">${staticData.prsMerged}</text>
       </g>
       
       <!-- Activity Cards Row 2 -->
       <g>
         <rect x="60" y="510" width="190" height="80" rx="8" class="card-warning" stroke-width="1"/>
         <text x="75" y="530" class="card-label">Open Issues</text>
-        <text x="75" y="555" class="card-value value-warning" id="openIssues">1089</text>
+        <text x="75" y="555" class="card-value value-warning">${staticData.openIssues}</text>
       </g>
       
       <g>
@@ -228,7 +243,7 @@ router.get('/:owner/:repo/card-metrics', async (req: Request, res: Response) => 
       <g>
         <rect x="60" y="650" width="190" height="80" rx="8" class="card-neutral" stroke-width="1"/>
         <text x="75" y="670" class="card-label">Contributors</text>
-        <text x="75" y="695" class="card-value" id="contributors">1933</text>
+        <text x="75" y="695" class="card-value">${staticData.contributors}</text>
       </g>
       
       <g>
@@ -257,20 +272,20 @@ router.get('/:owner/:repo/card-metrics', async (req: Request, res: Response) => 
       <g>
         <rect x="60" y="790" width="190" height="80" rx="8" class="card-success" stroke-width="1"/>
         <text x="75" y="810" class="card-label">Stars</text>
-        <text x="75" y="835" class="card-value value-success" id="stars">236k</text>
+        <text x="75" y="835" class="card-value value-success">${staticData.stars}</text>
         <use href="#starIcon" x="225" y="800" width="12" height="12" color="#166534"/>
       </g>
       
       <g>
         <rect x="265" y="790" width="190" height="80" rx="8" class="card-success" stroke-width="1"/>
         <text x="280" y="810" class="card-label">Forks</text>
-        <text x="280" y="835" class="card-value value-success" id="forks">48,697</text>
+        <text x="280" y="835" class="card-value value-success">${staticData.forks}</text>
       </g>
       
       <g>
         <rect x="470" y="790" width="190" height="80" rx="8" class="card-success" stroke-width="1"/>
         <text x="485" y="810" class="card-label">Watchers</text>
-        <text x="485" y="835" class="card-value value-success" id="watchers">6,733</text>
+        <text x="485" y="835" class="card-value value-success">${staticData.watchers}</text>
       </g>
       
       <g>
@@ -313,78 +328,17 @@ router.get('/:owner/:repo/card-metrics', async (req: Request, res: Response) => 
       <text x="80" y="1095" class="health-score-text" style="font-size: 13px;">Excellent overall health with strong community engagement</text>
       <text x="720" y="1085" class="health-score-text" style="font-size: 36px; font-weight: 700;">96/100</text>
       <text x="760" y="1105" class="health-score-text" style="font-size: 11px;">Production Ready</text>
-
-      <script><![CDATA[
-        async function fetchGitHubData() {
-          const repo = '${req.params.owner}/${req.params.repo}';
-          const apiBase = 'https://api.github.com/repos/' + repo;
-          
-          const fallbackData = {
-            stars: 236137,
-            forks: 48697,
-            openIssues: 1089,
-            watchers: 6733,
-            contributors: 1933,
-            buildStatus: 'Passing',
-            commitsWeek: 28,
-            prsMerged: 74
-          };
-          
-          try {
-            const repoRes = await fetch(apiBase);
-            if (!repoRes.ok) throw new Error('API Error');
-            const repoData = await repoRes.json();
-            
-            document.getElementById('stars').textContent = (repoData.stargazers_count / 1000).toFixed(0) + 'k';
-            document.getElementById('forks').textContent = repoData.forks_count.toLocaleString();
-            document.getElementById('openIssues').textContent = repoData.open_issues_count;
-            document.getElementById('watchers').textContent = repoData.subscribers_count.toLocaleString();
-            document.getElementById('buildStatus').textContent = repoData.archived ? 'Archived' : 'Passing';
-
-            const contribRes = await fetch(apiBase + '/contributors?per_page=1&anon=true');
-            const contribLink = contribRes.headers.get('Link');
-            let contributors = '-';
-            if (contribLink) {
-              const match = contribLink.match(/&page=(\d+)>; rel="last"/);
-              if (match) contributors = match[1];
-            } else {
-              const contribData = await contribRes.json();
-              contributors = contribData.length;
-            }
-            document.getElementById('contributors').textContent = contributors;
-
-            const commitsRes = await fetch(apiBase + '/stats/commit_activity');
-            const commitsData = await commitsRes.json();
-            const last6Weeks = commitsData.slice(-6);
-            const avgCommits = Math.round(last6Weeks.reduce((sum, week) => sum + week.total, 0) / 6);
-            document.getElementById('commitsWeek').textContent = avgCommits;
-
-            const prsRes = await fetch(apiBase + '/pulls?state=closed&per_page=100');
-            const prsData = await prsRes.json();
-            const now = new Date();
-            const thirtyDaysAgo = new Date(now.getTime() - 30 * 24 * 60 * 60 * 1000);
-            const mergedPRs = prsData.filter(pr => pr.merged_at && new Date(pr.merged_at) > thirtyDaysAgo).length;
-            document.getElementById('prsMerged').textContent = mergedPRs;
-
-          } catch (e) {
-            console.log('API failed, using fallback data');
-            document.getElementById('stars').textContent = (fallbackData.stars / 1000).toFixed(0) + 'k';
-            document.getElementById('forks').textContent = fallbackData.forks.toLocaleString();
-            document.getElementById('openIssues').textContent = fallbackData.openIssues;
-            document.getElementById('watchers').textContent = fallbackData.watchers.toLocaleString();
-            document.getElementById('contributors').textContent = fallbackData.contributors.toLocaleString();
-            document.getElementById('buildStatus').textContent = fallbackData.buildStatus;
-            document.getElementById('commitsWeek').textContent = fallbackData.commitsWeek;
-            document.getElementById('prsMerged').textContent = fallbackData.prsMerged;
-          }
-        }
-        
-        // Auto-load data when SVG loads
-        fetchGitHubData();
-      ]]></script>
     </svg>`;
-  res.setHeader('Content-Type', 'image/svg+xml');
-  return res.send(response);
+
+    res.setHeader('Content-Type', 'image/svg+xml');
+    res.send(response);
+  } catch (error) {
+    res.status(500).json({
+      success: false,
+      error: 'Failed to generate card metrics',
+      message: error instanceof Error ? error.message : 'Unknown error',
+    });
+  }
 });
 
 export default router;
