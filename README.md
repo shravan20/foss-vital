@@ -43,9 +43,31 @@ The API will be available at `http://localhost:3000`
 | `/api/projects/:owner/:repo` | GET | Basic project information |
 | `/api/projects/:owner/:repo/complete` | GET | Project with health data |
 | `/api/projects/:owner/:repo/metrics` | GET | Detailed project metrics |
+| `/api/projects/:owner/:repo/analysis` | GET |  Comprehensive project analysis |
+| `/api/projects/:owner/:repo/card-metrics` | GET | Dynamic SVG health card |
 | `/api/health/:owner/:repo` | GET | Project health score |
 | `/api/health/:owner/:repo/refresh` | POST | Force refresh health calculation |
 | `/api/health/cache/stats` | GET | Cache statistics |
+| `/api/rate-limit/status` | GET |  GitHub API rate limit status |
+
+### Dynamic Features
+
+#### Advanced Project Analysis
+
+- **Language-agnostic analysis** - Supports JavaScript, Python, Ruby, Go, Rust, PHP, Java, and more
+- **CI/CD detection** - GitHub Actions, Travis CI, CircleCI, Jenkins
+- **Testing framework detection** - Jest, Mocha, PyTest, RSpec, PHPUnit, etc.
+- **Linting setup analysis** - ESLint, Pylint, Prettier, RuboCop, golangci-lint
+- **Dependency analysis** - package.json, requirements.txt, Gemfile, go.mod, Cargo.toml, etc.
+- **Security vulnerability estimation** - Based on dependency analysis
+- **Test coverage estimation** - Heuristic analysis of test files vs source files
+
+#### Dynamic SVG Cards
+
+- **Real-time data** - All metrics fetched live from GitHub API
+- **Adaptive styling** - Colors and indicators change based on actual project health
+- **Comprehensive metrics** - 20+ different project health indicators
+- **Visual indicators** - Icons, colors, and gradients that reflect project status
 
 ## Example Usage
 
@@ -84,7 +106,7 @@ Environment variables:
 
 ## Project Structure
 
-```
+```text
 api/
 ├── index.ts                 # Main API handler for Vercel
 src/
@@ -108,14 +130,6 @@ src/
 1. **One-click deploy**: Use the button at the top of this README
 2. **Manual deploy**: Follow the [Deployment Guide](DEPLOYMENT.md)
 
-### Local Development
-
-```bash
-npm run dev      # Start development server
-npm run build    # Build for production
-npm run preview  # Preview with Vercel CLI
-```
-
 ## Rate Limits
 
 - **Without GitHub Token**: 60 requests/hour per IP
@@ -129,6 +143,8 @@ npm run preview  # Preview with Vercel CLI
 3. Commit your changes (`git commit -m 'Add some amazing feature'`)
 4. Push to the branch (`git push origin feature/amazing-feature`)
 5. Open a Pull Request
+
+[to understand how to contribute, refer](CONTRIBUTING.md)
 
 ## License
 

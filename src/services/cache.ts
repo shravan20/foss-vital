@@ -118,6 +118,34 @@ export class CacheService {
   static getHealthKey(owner: string, repo: string): string {
     return `health:${owner}/${repo}`;
   }
+
+  /**
+   * Generate a cache key for analysis data
+   */
+  static getAnalysisKey(owner: string, repo: string): string {
+    return `analysis:${owner}/${repo}`;
+  }
+
+  /**
+   * Generate a cache key for dependency analysis
+   */
+  static getDependencyKey(owner: string, repo: string): string {
+    return `deps:${owner}/${repo}`;
+  }
+
+  /**
+   * Generate a cache key for testing analysis
+   */
+  static getTestingKey(owner: string, repo: string): string {
+    return `testing:${owner}/${repo}`;
+  }
+
+  /**
+   * Generate a cache key for CI/CD analysis
+   */
+  static getCICDKey(owner: string, repo: string): string {
+    return `cicd:${owner}/${repo}`;
+  }
 }
 
 // Global cache instance

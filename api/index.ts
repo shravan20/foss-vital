@@ -1,3 +1,6 @@
+// Load environment variables first
+import 'dotenv/config';
+
 import express from 'express';
 import cors from 'cors';
 import type { Request, Response } from 'express';
@@ -40,6 +43,8 @@ app.get('/', (req: Request, res: Response) => {
       projects: '/api/projects/:owner/:repo',
       projectComplete: '/api/projects/:owner/:repo/complete',
       projectMetrics: '/api/projects/:owner/:repo/metrics',
+      projectAnalysis: '/api/projects/:owner/:repo/analysis',
+      projectCardSVG: '/api/projects/:owner/:repo/card-metrics',
       projectHealth: '/api/health/:owner/:repo',
       refreshHealth: 'POST /api/health/:owner/:repo/refresh',
       cacheStats: '/api/health/cache/stats',
@@ -61,12 +66,16 @@ app.use('*', (req: Request, res: Response) => {
       projects: '/api/projects/:owner/:repo',
       projectComplete: '/api/projects/:owner/:repo/complete',
       projectMetrics: '/api/projects/:owner/:repo/metrics',
+      projectAnalysis: '/api/projects/:owner/:repo/analysis',
+      projectCardSVG: '/api/projects/:owner/:repo/card-metrics',
       projectHealth: '/api/health/:owner/:repo',
       refreshHealth: 'POST /api/health/:owner/:repo/refresh',
       cacheStats: '/api/health/cache/stats',
     },
     examples: {
       "Get project info": "/api/projects/microsoft/vscode",
+      "Get project analysis": "/api/projects/microsoft/vscode/analysis",
+      "Get dynamic SVG card": "/api/projects/microsoft/vscode/card-metrics",
       "Get project health": "/api/health/microsoft/vscode",
       "Get cache stats": "/api/health/cache/stats"
     }
