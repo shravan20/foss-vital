@@ -3,6 +3,7 @@
  */
 
 import { appConfig } from '../config/app.js';
+import { logger } from './logger.js';
 
 interface RateLimitState {
   remaining: number;
@@ -70,7 +71,7 @@ class RateLimiter {
 
     const waitTime = Math.max(0, this.state.reset - Date.now());
     if (waitTime > 0) {
-      console.log(`⏳ Rate limit exceeded, waiting ${Math.ceil(waitTime / 1000)}s...`);
+      logger.info(`Rate limit exceeded, waiting ${Math.ceil(waitTime / 1000)}s...`);
       await new Promise(resolve => setTimeout(resolve, waitTime));
     }
   }

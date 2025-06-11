@@ -99,7 +99,7 @@ app.use((err: Error, req: Request, res: Response, next: any) => {
 if (!process.env.VERCEL) {
   const port = appConfig.port || 3000;
   app.listen(port, () => {
-    console.log(`Server running on http://localhost:${port}`);
+    logger.info(`Server running on http://localhost:${port}`);
   });
 }
 

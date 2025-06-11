@@ -1,10 +1,10 @@
 # Rate Limiting
 
-## 🔑 GitHub Token Verification Guide
+## GitHub Token Verification Guide
 
 This guide explains how to verify if your GitHub token is properly configured and being used by FOSS Vital.
 
-## 🚀 Quick Token Status Check
+## Quick Token Status Check
 
 ### Method 1: Rate Limit Status (Recommended)
 
@@ -29,7 +29,7 @@ curl -s "http://localhost:3000/api/rate-limit/status" | jq
 }
 ```
 
-### 🔍 What to Look For
+### What to Look For
 
 | Field | With Token | Without Token | Meaning |
 |-------|------------|---------------|---------|
@@ -63,27 +63,27 @@ curl -s "http://localhost:3000/api/projects/microsoft/vscode" | jq '.success'
 curl -s "http://localhost:3000/api/rate-limit/status" | jq
 ```
 
-## 📊 Understanding the Results
+## Understanding the Results
 
-### ✅ Token Working Correctly
+### Token Working Correctly
 
 - **Limit**: 5000 requests per hour
 - **Rate limit headers**: Updated from GitHub API
 - **Authentication**: `Authorization: token <your-token>` header sent
 
-### ❌ No Token or Token Invalid
+### No Token or Token Invalid
 
 - **Limit**: 60 requests per hour  
 - **Rate limit**: IP-based limiting
 - **Authentication**: No authorization header
 
-### ⚠️ Token Issues
+### Token Issues
 
 - **403 Forbidden**: Token invalid or expired
 - **422 Unprocessable**: Token lacks required permissions
 - **Rate limit exceeded**: Too many requests
 
-## 🔧 Token Configuration
+## Token Configuration
 
 ### Environment Variables
 
@@ -105,13 +105,13 @@ GITHUB_TOKEN=ghp_your_token_here
 
 For public repositories:
 
-- ✅ `public_repo` - Access public repositories
+- `public_repo` - Access public repositories
 
 For private repositories:
 
-- ✅ `repo` - Full repository access
+- `repo` - Full repository access
 
-## 🚨 Troubleshooting
+## Troubleshooting
 
 ### Problem: Still showing 60 requests/hour
 
@@ -150,7 +150,7 @@ For private repositories:
 2. Consider using multiple tokens for different environments
 3. Implement additional caching
 
-## 🔄 Real-time Monitoring
+## Real-time Monitoring
 
 ### Monitor Rate Limit Status
 
@@ -165,7 +165,7 @@ watch -n 30 'curl -s http://localhost:3000/api/rate-limit/status | jq'
 curl -s "http://localhost:3000/api/health/cache/stats" | jq
 ```
 
-## 📈 Production Verification
+## Production Verification
 
 ### Deployed App Check
 
@@ -180,7 +180,7 @@ curl -s "https://your-app.vercel.app/api/rate-limit/status" | jq
 2. Ensure `GITHUB_TOKEN` is properly set
 3. Redeploy if needed
 
-## ⚡ Quick Debug Commands
+## Quick Debug Commands
 
 ```bash
 # All-in-one verification
@@ -192,7 +192,7 @@ echo "=== Updated Status ===" && \
 curl -s "http://localhost:3000/api/rate-limit/status" | jq '{limit, remaining, used}'
 ```
 
-## 🎯 Expected Behavior
+## Expected Behavior
 
 **With Valid Token:**
 
@@ -210,7 +210,7 @@ curl -s "http://localhost:3000/api/rate-limit/status" | jq '{limit, remaining, u
 
 ---
 
-## 🔗 Related Documentation
+## Related Documentation
 
 - [GitHub Token Creation](https://docs.github.com/en/authentication/keeping-your-account-and-data-secure/creating-a-personal-access-token)
 - [GitHub API Rate Limits](https://docs.github.com/en/rest/overview/resources-in-the-rest-api#rate-limiting)
@@ -218,4 +218,4 @@ curl -s "http://localhost:3000/api/rate-limit/status" | jq '{limit, remaining, u
 
 ---
 
-*💡 **Pro Tip:** Always use a GitHub token in production to avoid hitting rate limits quickly!*
+*Pro Tip: Always use a GitHub token in production to avoid hitting rate limits quickly!*
