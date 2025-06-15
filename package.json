@@ -4,7 +4,7 @@
   "description": "Your FOSS project's health report - A clean, simple API for fetching GitHub repository data",
   "type": "module",
   "scripts": {
-    "dev":"concurrently \"tsc --watch\" \"nodemon --watch dist --exec node dist/api/index.js\"",
+    "dev": "concurrently \"tsc --watch\" \"nodemon --watch dist --exec node dist/api/index.js\"",
     "build": "tsc",
     "start": "node dist/api/index.js",
     "deploy": "vercel --prod",
@@ -12,6 +12,7 @@
   },
   "dependencies": {
     "cors": "^2.8.5",
+    "dotenv": "^16.5.0",
     "express": "^4.19.2"
   },
   "devDependencies": {

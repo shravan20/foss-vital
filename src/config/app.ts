@@ -24,8 +24,8 @@ export const appConfig: AppConfig = {
     apiUrl: process.env.GITHUB_API_URL || 'https://api.github.com',
   },
   cache: {
-    ttl: parseInt(process.env.CACHE_TTL || '300000'), // 5 minutes default
-    maxSize: parseInt(process.env.CACHE_MAX_SIZE || '1000'), // 1000 items max
+    ttl: parseInt(process.env.CACHE_TTL || '259200000'), // 3 days default
+    maxSize: parseInt(process.env.CACHE_MAX_SIZE || '10000'), // 10000 items max
   },
 };
 

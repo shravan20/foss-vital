@@ -6,15 +6,20 @@ Thank you for your interest in contributing to FOSS Vital!
 
 1. **Fork the repository** on GitHub
 2. **Clone your fork** locally:
+
    ```bash
-   git clone https://github.com/shravan20/foss-vital.git
+   git clone https://github.com/your_username/foss-vital.git
    cd foss-vital
    ```
+
 3. **Install dependencies**:
+
    ```bash
    npm install
    ```
+
 4. **Start development server**:
+
    ```bash
    npm run dev
    ```
@@ -22,6 +27,7 @@ Thank you for your interest in contributing to FOSS Vital!
 ## Making Changes
 
 1. **Create a feature branch**:
+
    ```bash
    git checkout -b feature/your-feature-name
    ```
@@ -29,16 +35,19 @@ Thank you for your interest in contributing to FOSS Vital!
 2. **Make your changes** and test them locally
 
 3. **Build the project** to ensure it compiles:
+
    ```bash
    npm run build
    ```
 
 4. **Commit your changes**:
+
    ```bash
    git commit -m "Add: your descriptive commit message"
    ```
 
 5. **Push to your fork**:
+
    ```bash
    git push origin feature/your-feature-name
    ```
@@ -48,13 +57,16 @@ Thank you for your interest in contributing to FOSS Vital!
 ## Development Guidelines
 
 ### Code Style
+
 - Use TypeScript for all new code
 - Follow existing code formatting
 - Use descriptive variable and function names
 - Add comments for complex logic
 
 ### Commit Messages
+
 Use clear, descriptive commit messages:
+
 - `Add: new feature or functionality`
 - `Fix: bug fixes`
 - `Update: changes to existing features`
@@ -62,22 +74,26 @@ Use clear, descriptive commit messages:
 - `Refactor: code improvements without feature changes`
 
 ### Environment Setup
+
 - Copy `.env.example` to `.env` for local development
 - Add your GitHub token for higher API rate limits (optional)
 
 ## What Can You Contribute?
 
 ### Bug Reports
+
 - Check existing issues first
 - Provide clear reproduction steps
 - Include environment details
 
 ### Feature Requests
+
 - Describe the problem you're solving
 - Explain why this feature would be useful
 - Consider the scope and complexity
 
 ### Code Contributions
+
 - **API improvements**: Better error handling, new endpoints
 - **Health scoring**: Improve the algorithm or add new metrics
 - **Performance**: Optimize caching or GitHub API usage
@@ -85,6 +101,7 @@ Use clear, descriptive commit messages:
 - **Testing**: Add tests for existing functionality
 
 ### Documentation
+
 - Fix typos or unclear explanations
 - Add more examples
 - Improve deployment guides

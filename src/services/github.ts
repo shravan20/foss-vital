@@ -1,10 +1,20 @@
-/**
- * GitHub service for fetching project data with caching
- */
-
 import { appConfig } from '../config/app.js';
 import { cache, CacheService } from './cache.js';
-import type { Project, ProjectMetrics, CommitActivity, Contributor, IssueStats, PullRequestStats, DocumentationCheck } from '../models/project.js';
+import { rateLimiter } from '../utils/rate-limiter.js';
+import type {
+  Project,
+  ProjectMetrics,
+  CommitActivity,
+  Contributor,
+  IssueStats,
+  PullRequestStats,
+  DocumentationCheck,
+  GitHubWorkflow,
+  GitHubWorkflowRun,
+  GitHubTreeItem,
+  GitHubCommit,
+  GitHubRelease
+} from '../models/project.js';
 
 export interface GitHubRepository {
   id: number;
@@ -23,6 +33,7 @@ export interface GitHubRepository {
   pushed_at: string;
   created_at: string;
   updated_at: string;
+  default_branch: string;
   owner: {
     login: string;
   };
@@ -41,6 +52,9 @@ export interface GitHubIssue {
 }
 
 export class GitHubService {
+  /**
+   * GitHub service for fetching project data with caching
+   */
   private readonly baseUrl: string;
   private readonly token?: string;
 
@@ -50,27 +64,32 @@ export class GitHubService {
   }
 
   private async makeRequest<T>(endpoint: string): Promise<T> {
-    const headers: Record<string, string> = {
-      'Accept': 'application/vnd.github.v3+json',
-      'User-Agent': 'FOSS-Vital/1.0',
-    };
+    return rateLimiter.executeRequest(async () => {
+      const headers: Record<string, string> = {
+        'Accept': 'application/vnd.github.v3+json',
+        'User-Agent': 'FOSS-Vital/1.0',
+      };
 
-    if (this.token) {
-      headers['Authorization'] = `token ${this.token}`;
-    }
+      if (this.token) {
+        headers['Authorization'] = `token ${this.token}`;
+      }
 
-    const response = await fetch(`${this.baseUrl}${endpoint}`, { headers });
-    
-    if (!response.ok) {
-      throw new Error(`GitHub API error: ${response.status} ${response.statusText}`);
-    }
+      const response = await fetch(`${this.baseUrl}${endpoint}`, { headers });
 
-    return response.json();
+      // Update rate limiter with response headers
+      rateLimiter.updateFromHeaders(Object.fromEntries(response.headers.entries()));
+
+      if (!response.ok) {
+        throw new Error(`GitHub API error: ${response.status} ${response.statusText}`);
+      }
+
+      return response.json();
+    });
   }
 
   async getProject(owner: string, repo: string): Promise<Project> {
     const cacheKey = CacheService.getRepoKey(owner, repo);
-    
+
     // Try to get from cache first
     const cached = cache.get<Project>(cacheKey);
     if (cached) {
@@ -79,7 +98,7 @@ export class GitHubService {
 
     // Fetch from GitHub API
     const repoData = await this.makeRequest<GitHubRepository>(`/repos/${owner}/${repo}`);
-    
+
     const project: Project = {
       id: repoData.id,
       name: repoData.name,
@@ -100,13 +119,13 @@ export class GitHubService {
 
     // Cache the result
     cache.set(cacheKey, project);
-    
+
     return project;
   }
 
   async getProjectMetrics(owner: string, repo: string): Promise<ProjectMetrics> {
     const cacheKey = CacheService.getMetricsKey(owner, repo);
-    
+
     // Try to get from cache first
     const cached = cache.get<ProjectMetrics>(cacheKey);
     if (cached) {
@@ -135,7 +154,7 @@ export class GitHubService {
 
     // Cache the result
     cache.set(cacheKey, metrics);
-    
+
     return metrics;
   }
 
@@ -251,5 +270,92 @@ export class GitHubService {
       hasChangelog: checks[3],
       hasCodeOfConduct: checks[4],
     };
+  }
+
+  /**
+   * Get GitHub Actions workflows
+   */
+  async getWorkflows(owner: string, repo: string): Promise<GitHubWorkflow[]> {
+    try {
+      const response = await this.makeRequest<{ workflows: GitHubWorkflow[] }>(`/repos/${owner}/${repo}/actions/workflows`);
+      return response.workflows || [];
+    } catch {
+      return [];
+    }
+  }
+
+  /**
+   * Get workflow runs
+   */
+  async getWorkflowRuns(owner: string, repo: string): Promise<GitHubWorkflowRun[]> {
+    try {
+      const response = await this.makeRequest<{ workflow_runs: GitHubWorkflowRun[] }>(`/repos/${owner}/${repo}/actions/runs?per_page=20`);
+      return response.workflow_runs || [];
+    } catch {
+      return [];
+    }
+  }
+
+  /**
+   * Get repository tree (file structure)
+   */
+  async getRepositoryTree(owner: string, repo: string): Promise<GitHubTreeItem[]> {
+    try {
+      // First get the default branch
+      const repoData = await this.makeRequest<GitHubRepository>(`/repos/${owner}/${repo}`);
+      const defaultBranch = repoData.default_branch || 'main';
+
+      // Get the tree recursively
+      const response = await this.makeRequest<{ tree: GitHubTreeItem[] }>(`/repos/${owner}/${repo}/git/trees/${defaultBranch}?recursive=1`);
+      return response.tree || [];
+    } catch {
+      return [];
+    }
+  }
+
+  /**
+   * Get file content
+   */
+  async getFileContent(owner: string, repo: string, path: string): Promise<string> {
+    const response = await this.makeRequest<{ content: string; encoding: string }>(`/repos/${owner}/${repo}/contents/${path}`);
+
+    if (response.encoding === 'base64') {
+      return Buffer.from(response.content, 'base64').toString('utf-8');
+    }
+
+    return response.content;
+  }
+
+  /**
+   * Get repository languages
+   */
+  async getLanguages(owner: string, repo: string): Promise<{ [key: string]: number }> {
+    try {
+      return await this.makeRequest<{ [key: string]: number }>(`/repos/${owner}/${repo}/languages`);
+    } catch {
+      return {};
+    }
+  }
+
+  /**
+   * Get repository releases
+   */
+  async getReleases(owner: string, repo: string): Promise<GitHubRelease[]> {
+    try {
+      return await this.makeRequest<GitHubRelease[]>(`/repos/${owner}/${repo}/releases?per_page=20`);
+    } catch {
+      return [];
+    }
+  }
+
+  /**
+   * Get recent commits
+   */
+  async getRecentCommits(owner: string, repo: string): Promise<GitHubCommit[]> {
+    try {
+      return await this.makeRequest<GitHubCommit[]>(`/repos/${owner}/${repo}/commits?per_page=20`);
+    } catch {
+      return [];
+    }
   }
 }

@@ -1,3 +1,6 @@
+// Load environment variables first
+import 'dotenv/config';
+
 import express from 'express';
 import cors from 'cors';
 import type { Request, Response } from 'express';
@@ -31,7 +34,7 @@ app.use('/api', apiRoutes);
 app.get('/', (req: Request, res: Response) => {
   res.json({
     name: 'FOSS Vital API',
-    description: 'GitHub API boilerplate with intelligent caching and health scoring',
+    description: `Your FOSS project's health report as README card!`,
     version: '1.0.0',
     environment: process.env.VERCEL ? 'vercel' : 'local',
     endpoints: {
@@ -40,6 +43,8 @@ app.get('/', (req: Request, res: Response) => {
       projects: '/api/projects/:owner/:repo',
       projectComplete: '/api/projects/:owner/:repo/complete',
       projectMetrics: '/api/projects/:owner/:repo/metrics',
+      projectAnalysis: '/api/projects/:owner/:repo/analysis',
+      projectCardSVG: '/api/projects/:owner/:repo/card-metrics',
       projectHealth: '/api/health/:owner/:repo',
       refreshHealth: 'POST /api/health/:owner/:repo/refresh',
       cacheStats: '/api/health/cache/stats',
@@ -61,13 +66,17 @@ app.use('*', (req: Request, res: Response) => {
       projects: '/api/projects/:owner/:repo',
       projectComplete: '/api/projects/:owner/:repo/complete',
       projectMetrics: '/api/projects/:owner/:repo/metrics',
+      projectAnalysis: '/api/projects/:owner/:repo/analysis',
+      projectCardSVG: '/api/projects/:owner/:repo/card-metrics',
       projectHealth: '/api/health/:owner/:repo',
       refreshHealth: 'POST /api/health/:owner/:repo/refresh',
       cacheStats: '/api/health/cache/stats',
     },
     examples: {
-      "Get project info": "/api/projects/microsoft/vscode",
-      "Get project health": "/api/health/microsoft/vscode",
+      "Get project info": "/api/projects/raghavyuva/nixopus",
+      "Get project analysis": "/api/projects/raghavyuva/nixopus/analysis",
+      "Get dynamic SVG card": "/api/projects/raghavyuva/nixopus/card-metrics",
+      "Get project health": "/api/health/raghavyuva/nixopus",
       "Get cache stats": "/api/health/cache/stats"
     }
   });
@@ -90,7 +99,7 @@ app.use((err: Error, req: Request, res: Response, next: any) => {
 if (!process.env.VERCEL) {
   const port = appConfig.port || 3000;
   app.listen(port, () => {
-    console.log(`Server running on http://localhost:${port}`);
+    logger.info(`Server running on http://localhost:${port}`);
   });
 }
 
