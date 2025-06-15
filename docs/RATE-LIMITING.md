@@ -218,4 +218,4 @@ curl -s "http://localhost:3000/api/rate-limit/status" | jq '{limit, remaining, u
 
 ---
 
-*Pro Tip: Always use a GitHub token in production to avoid hitting rate limits quickly!*
+*NOTE: Always use a GitHub token in production to avoid hitting rate limits quickly!*
