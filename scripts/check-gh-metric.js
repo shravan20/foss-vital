@@ -3,21 +3,21 @@
  */
 
 import fetch from 'node-fetch';
-import { logger } from './src/utils/logger.js';
+import { logger } from '../src/utils/logger.js';
 
 const BASE_URL = 'http://localhost:3001';
 
 async function testEndpoint(endpoint, description) {
   logger.info(`\nTesting: ${description}`);
   logger.info(`Endpoint: ${endpoint}`);
-  
+
   try {
     const response = await fetch(endpoint);
     const data = await response.json();
-    
+
     if (response.ok) {
       logger.info('Success!');
-      
+
       // Show relevant parts of the response
       if (endpoint.includes('rate-limit/status')) {
         logger.info(`   Rate Limit: ${data.remaining}/${data.limit} remaining`);
@@ -48,50 +48,22 @@ async function testEndpoint(endpoint, description) {
 async function runTests() {
   logger.info('FOSS Vital Enhanced Features Test Suite');
   logger.info('==========================================');
-  
+
   // Test basic API info
   await testEndpoint(`${BASE_URL}/api`, 'API Information & Endpoints');
-  
+
   // Test rate limiting status
   await testEndpoint(`${BASE_URL}/api/rate-limit/status`, 'GitHub API Rate Limit Status');
-  
+
   // Test cache statistics
   await testEndpoint(`${BASE_URL}/api/health/cache/stats`, 'Cache Statistics');
-  
+
   // Test enhanced analysis (may fail due to rate limiting)
   await testEndpoint(`${BASE_URL}/api/projects/facebook/react/analysis`, 'Enhanced Project Analysis');
-  
+
   // Test dynamic SVG card generation
   await testEndpoint(`${BASE_URL}/api/projects/facebook/react/card-metrics`, 'Dynamic SVG Card Generation');
-  
-  logger.info('\nTest Summary:');
-  logger.info('================');
-  logger.info('Core API functionality working');
-  logger.info('Rate limiting system active');
-  logger.info('Caching system operational');
-  logger.info('New endpoints properly configured');
-  logger.info('GitHub API rate limited (expected behavior)');
-  
-  logger.info('\nKey Enhancements Delivered:');
-  logger.info('==============================');
-  logger.info('1. Comprehensive dependency analysis (8+ package managers)');
-  logger.info('2. Enhanced test coverage estimation with language-specific heuristics');
-  logger.info('3. Sophisticated vulnerability assessment');
-  logger.info('4. Intelligent caching with TTL optimization');
-  logger.info('5. GitHub API rate limiting with queue management');
-  logger.info('6. Dynamic SVG card generation with real-time data');
-  logger.info('7. Multi-language CI/CD detection');
-  logger.info('8. Advanced linting configuration analysis');
-  
-  logger.info('\nProduction Ready Features:');
-  logger.info('==============================');
-  logger.info('• Automatic rate limit handling');
-  logger.info('• Intelligent cache invalidation');
-  logger.info('• Error recovery and fallback mechanisms');
-  logger.info('• Comprehensive logging and monitoring');
-  logger.info('• RESTful API design with proper HTTP status codes');
-  logger.info('• TypeScript type safety throughout');
+
 }
 
-// Run tests
 runTests().catch(logger.error);
