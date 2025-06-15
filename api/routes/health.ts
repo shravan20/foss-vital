@@ -2,9 +2,11 @@ import express from 'express';
 import type { Request, Response } from 'express';
 import { cache } from '../../src/services/cache.js';
 import { ProjectService } from '../../src/services/project.js';
+import { GitHubService } from '../../src/services/github.js';
 
 const router = express.Router();
 const projectService = new ProjectService();
+const githubService = new GitHubService();
 
 // Health check endpoint
 router.get('/', (req: Request, res: Response) => {
@@ -30,6 +32,29 @@ router.get('/cache/stats', async (req: Request, res: Response) => {
     res.status(500).json({
       success: false,
       error: 'Failed to fetch cache statistics',
+      message: error instanceof Error ? error.message : 'Unknown error',
+    });
+  }
+});
+
+// GitHub authentication status
+router.get('/github/auth', async (req: Request, res: Response) => {
+  try {
+    const authStatus = githubService.getAuthenticationStatus();
+
+    res.json({
+      success: true,
+      data: {
+        ...authStatus,
+        recommendation: !authStatus.isAuthenticated 
+          ? 'Add GITHUB_TOKEN environment variable for higher rate limits and access to private repositories'
+          : 'GitHub authentication is properly configured'
+      },
+    });
+  } catch (error) {
+    res.status(500).json({
+      success: false,
+      error: 'Failed to check GitHub authentication status',
       message: error instanceof Error ? error.message : 'Unknown error',
     });
   }

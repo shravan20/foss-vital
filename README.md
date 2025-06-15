@@ -68,6 +68,7 @@ The API will be available at `http://localhost:3000`
 |----------|--------|-------------|
 | `/` | GET | API information |
 | `/health` | GET | Health check |
+| `/health/github/auth` | GET | GitHub authentication status |
 | `/api/projects/:owner/:repo` | GET | Basic project information |
 | `/api/projects/:owner/:repo/complete` | GET | Project with health data |
 | `/api/projects/:owner/:repo/metrics` | GET | Detailed project metrics |
@@ -115,7 +116,7 @@ Each dimension is scored 0-100, and the overall score is a weighted average.
 
 ## Configuration
 
-Environment variables:
+### Environment Variables
 
 | Variable | Default | Description |
 |----------|---------|-------------|
@@ -123,6 +124,63 @@ Environment variables:
 | `NODE_ENV` | `development` | Environment mode |
 | `CORS_ORIGINS` | `*` | Allowed CORS origins (comma-separated) |
 | `PORT` | `3000` | Server port (local development only) |
+
+### GitHub Authentication (Recommended)
+
+While FOSS Vital works without authentication, adding a GitHub token significantly improves the experience:
+
+**Without Authentication:**
+
+- ⚠️ 60 requests per hour per IP address
+- ❌ No access to private repositories
+- ⚠️ May hit rate limits quickly
+
+**With Authentication:**
+
+- ✅ 5,000 requests per hour
+- ✅ Access to private repositories (if token has permissions)
+- ✅ Better error handling and detailed rate limit information
+
+#### How to Set Up GitHub Authentication
+
+1. **Create a Personal Access Token:**
+   - Go to [GitHub Settings > Tokens](https://github.com/settings/tokens)
+   - Click "Generate new token" → "Generate new token (classic)"
+   - Give it a descriptive name (e.g., "FOSS Vital API")
+   - Select scopes:
+     - `public_repo` (for public repositories)
+     - `repo` (if you need private repository access)
+
+2. **Configure the Token:**
+
+   ```bash
+   # Copy .env.example to .env
+   cp .env.example .env
+   
+   # Edit .env and add your token
+   GITHUB_TOKEN=your_token_here
+   ```
+
+3. **Verify Authentication:**
+
+   ```bash
+   # Check authentication status
+   curl http://localhost:3000/health/github/auth
+   ```
+
+   Or run the test script:
+
+   ```bash
+   npm run test:auth
+   ```
+
+#### Token Security Best Practices
+
+- ✅ Never commit tokens to version control
+- ✅ Use environment variables for deployment
+- ✅ Regularly rotate tokens
+- ✅ Use minimal required permissions
+- ❌ Don't share tokens in logs or error messages
 
 ## Project Structure
 
