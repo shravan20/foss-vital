@@ -8,7 +8,7 @@ const router = express.Router();
 router.get('/', (req: Request, res: Response) => {
   res.json({
     name: 'FOSS Vital API',
-    description: 'GitHub API boilerplate with intelligent caching and health scoring',
+    description: `Your FOSS project's health report as README card!`,
     version: '1.0.0',
     environment: process.env.VERCEL ? 'vercel' : 'local',
     message: 'API is running successfully!',
@@ -43,7 +43,7 @@ router.get('/rate-limit/status', (req: Request, res: Response) => {
     ...status,
     isNearLimit: rateLimiter.isNearLimit(),
     recommendedCacheTTL: rateLimiter.getRecommendedCacheTTL(),
-    timeUntilResetFormatted: status.timeUntilReset > 0 
+    timeUntilResetFormatted: status.timeUntilReset > 0
       ? `${Math.ceil(status.timeUntilReset / 1000 / 60)} minutes`
       : 'Reset available now'
   });

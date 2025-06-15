@@ -34,7 +34,7 @@ app.use('/api', apiRoutes);
 app.get('/', (req: Request, res: Response) => {
   res.json({
     name: 'FOSS Vital API',
-    description: 'GitHub API boilerplate with intelligent caching and health scoring',
+    description: `Your FOSS project's health report as README card!`,
     version: '1.0.0',
     environment: process.env.VERCEL ? 'vercel' : 'local',
     endpoints: {
