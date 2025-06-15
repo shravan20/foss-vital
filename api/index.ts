@@ -73,10 +73,10 @@ app.use('*', (req: Request, res: Response) => {
       cacheStats: '/api/health/cache/stats',
     },
     examples: {
-      "Get project info": "/api/projects/microsoft/vscode",
-      "Get project analysis": "/api/projects/microsoft/vscode/analysis",
-      "Get dynamic SVG card": "/api/projects/microsoft/vscode/card-metrics",
-      "Get project health": "/api/health/microsoft/vscode",
+      "Get project info": "/api/projects/raghavyuva/nixopus",
+      "Get project analysis": "/api/projects/raghavyuva/nixopus/analysis",
+      "Get dynamic SVG card": "/api/projects/raghavyuva/nixopus/card-metrics",
+      "Get project health": "/api/health/raghavyuva/nixopus",
       "Get cache stats": "/api/health/cache/stats"
     }
   });
