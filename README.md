@@ -1,8 +1,16 @@
 # FOSS Vital
 
-Your FOSS project's health report - A clean, simple API for fetching GitHub repository data with intelligent caching and health scoring.
+Your FOSS project's health report as README card!
+
+<div align="center">
 
 [![Deploy with Vercel](https://vercel.com/button)](https://vercel.com/new/clone?repository-url=https://github.com/shravan20/foss-vital&env=GITHUB_TOKEN&envDescription=Optional%20GitHub%20token%20for%20higher%20rate%20limits&project-name=foss-vital&repository-name=foss-vital)
+
+</div>
+
+<p align="center">
+    <img src="https://madewithlove.now.sh/in?heart=true&colorA=%23ff671f&colorB=%23046a38&text=the+Quantum+Realm+of+Open+Source" alt="Made with love with Open Source"/>
+</p>
 
 ## Features
 
