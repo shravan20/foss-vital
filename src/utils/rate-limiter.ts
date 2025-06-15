@@ -1,5 +1,5 @@
 /**
- * Rate limiter utility for GitHub API calls
+ * rate limiter utility for GitHub API calls
  */
 
 import { appConfig } from '../config/app.js';

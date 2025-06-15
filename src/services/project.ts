@@ -2,9 +2,9 @@
  * Project service for fetching GitHub project data with health calculation
  */
 
-import type { 
-  Project, 
-  ProjectMetrics, 
+import type {
+  Project,
+  ProjectMetrics,
   ProjectHealth,
   AdvancedProjectAnalysis,
   CICDInfo,
@@ -37,7 +37,7 @@ export class ProjectService {
 
   async getProjectHealth(owner: string, repo: string): Promise<ProjectHealth> {
     const cacheKey = CacheService.getHealthKey(owner, repo);
-    
+
     // Try to get from cache first
     const cached = cache.get<ProjectHealth>(cacheKey);
     if (cached) {
@@ -50,7 +50,7 @@ export class ProjectService {
 
     // Cache the result
     cache.set(cacheKey, health);
-    
+
     return health;
   }
 
@@ -71,7 +71,7 @@ export class ProjectService {
    */
   async getAdvancedAnalysis(owner: string, repo: string): Promise<AdvancedProjectAnalysis> {
     const cacheKey = `advanced:${owner}/${repo}`;
-    
+
     // Try to get from cache first
     const cached = cache.get<AdvancedProjectAnalysis>(cacheKey);
     if (cached) {
@@ -133,7 +133,7 @@ export class ProjectService {
 
     // Cache the result
     cache.set(cacheKey, analysis, 1800000); // 30 minutes cache
-    
+
     return analysis;
   }
 
@@ -178,11 +178,11 @@ export class ProjectService {
   private async analyzeTesting(owner: string, repo: string): Promise<TestingInfo> {
     try {
       const fileTree = await this.githubService.getRepositoryTree(owner, repo);
-      
+
       const testDirs = ['test', 'tests', '__tests__', 'spec', 'specs', 'testing'];
       const testExtensions = ['.test.', '.spec.', '_test.', '_spec.'];
-      
-      const testDirectories = fileTree.filter(file => 
+
+      const testDirectories = fileTree.filter(file =>
         testDirs.some(dir => file.path.toLowerCase().includes(dir))
       ).map(f => f.path);
 
@@ -336,7 +336,7 @@ export class ProjectService {
     const now = new Date();
     const lastCommit = new Date(recentActivity.lastCommit || now);
     const daysSinceLastCommit = Math.floor((now.getTime() - lastCommit.getTime()) / (1000 * 60 * 60 * 24));
-    
+
     return {
       lastCommit: daysSinceLastCommit === 0 ? 'Today' : daysSinceLastCommit === 1 ? '1d ago' : `${daysSinceLastCommit}d ago`,
       commitsPerWeek: Math.floor(Math.random() * 50 + 10),
@@ -379,15 +379,15 @@ export class ProjectService {
 
   private calculateOverallHealthScore(health: ProjectHealth, cicd: CICDInfo, testing: TestingInfo, deps: DependencyInfo): any {
     let score = health.overallScore;
-    
+
     // Bonus points for good practices
     if (cicd.hasGitHubActions) score += 5;
     if (testing.hasTests) score += 10;
     if (testing.estimatedCoverage > 70) score += 5;
     if (deps.vulnerabilities === 0) score += 5;
-    
+
     score = Math.min(100, score);
-    
+
     return {
       score,
       status: score >= 90 ? 'Excellent' : score >= 70 ? 'Good' : score >= 50 ? 'Fair' : 'Poor',
@@ -405,7 +405,7 @@ export class ProjectService {
   private detectTestFrameworks(files: any[]): string[] {
     const frameworks = [];
     const content = files.map(f => f.path.toLowerCase()).join(' ');
-    
+
     if (content.includes('jest')) frameworks.push('Jest');
     if (content.includes('mocha')) frameworks.push('Mocha');
     if (content.includes('jasmine')) frameworks.push('Jasmine');
@@ -414,23 +414,23 @@ export class ProjectService {
     if (content.includes('unittest')) frameworks.push('unittest');
     if (content.includes('rspec')) frameworks.push('RSpec');
     if (content.includes('phpunit')) frameworks.push('PHPUnit');
-    
+
     return frameworks;
   }
 
   private estimateTestCoverage(allFiles: any[], testFiles: any[]): number {
     if (testFiles.length === 0) return 0;
-    
+
     const ratio = testFiles.length / Math.max(allFiles.length, 1);
     return Math.min(95, Math.floor(ratio * 300 + 20));
   }
 
   private determineBuildStatus(workflowRuns: any[]): 'Passing' | 'Failing' | 'Unknown' {
     if (workflowRuns.length === 0) return 'Unknown';
-    
+
     const recentRuns = workflowRuns.slice(0, 5);
     const successRate = recentRuns.filter(run => run.conclusion === 'success').length / recentRuns.length;
-    
+
     return successRate > 0.7 ? 'Passing' : 'Failing';
   }
 
@@ -444,7 +444,7 @@ export class ProjectService {
       '.buildkite/pipeline.yml',
       '.gitlab-ci.yml'
     ];
-    
+
     return await this.checkMultipleFiles(owner, repo, ciFiles);
   }
 
@@ -459,7 +459,7 @@ export class ProjectService {
         }
       })
     );
-    
+
     return results
       .filter(result => result.status === 'fulfilled' && result.value !== null)
       .map(result => (result as PromiseFulfilledResult<string>).value);
@@ -477,7 +477,7 @@ export class ProjectService {
     try {
       const languages = await this.githubService.getLanguages(owner, repo);
       const total = Object.values(languages).reduce((sum: number, bytes: any) => sum + bytes, 0);
-      
+
       return Object.entries(languages).map(([name, bytes]: [string, any]) => ({
         name,
         bytes,

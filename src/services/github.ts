@@ -1,17 +1,13 @@
-/**
- * GitHub service for fetching project data with caching
- */
-
 import { appConfig } from '../config/app.js';
 import { cache, CacheService } from './cache.js';
 import { rateLimiter } from '../utils/rate-limiter.js';
-import type { 
-  Project, 
-  ProjectMetrics, 
-  CommitActivity, 
-  Contributor, 
-  IssueStats, 
-  PullRequestStats, 
+import type {
+  Project,
+  ProjectMetrics,
+  CommitActivity,
+  Contributor,
+  IssueStats,
+  PullRequestStats,
   DocumentationCheck,
   GitHubWorkflow,
   GitHubWorkflowRun,
@@ -56,6 +52,9 @@ export interface GitHubIssue {
 }
 
 export class GitHubService {
+  /**
+   * GitHub service for fetching project data with caching
+   */
   private readonly baseUrl: string;
   private readonly token?: string;
 
@@ -76,10 +75,10 @@ export class GitHubService {
       }
 
       const response = await fetch(`${this.baseUrl}${endpoint}`, { headers });
-      
+
       // Update rate limiter with response headers
       rateLimiter.updateFromHeaders(Object.fromEntries(response.headers.entries()));
-      
+
       if (!response.ok) {
         throw new Error(`GitHub API error: ${response.status} ${response.statusText}`);
       }
@@ -90,7 +89,7 @@ export class GitHubService {
 
   async getProject(owner: string, repo: string): Promise<Project> {
     const cacheKey = CacheService.getRepoKey(owner, repo);
-    
+
     // Try to get from cache first
     const cached = cache.get<Project>(cacheKey);
     if (cached) {
@@ -99,7 +98,7 @@ export class GitHubService {
 
     // Fetch from GitHub API
     const repoData = await this.makeRequest<GitHubRepository>(`/repos/${owner}/${repo}`);
-    
+
     const project: Project = {
       id: repoData.id,
       name: repoData.name,
@@ -120,13 +119,13 @@ export class GitHubService {
 
     // Cache the result
     cache.set(cacheKey, project);
-    
+
     return project;
   }
 
   async getProjectMetrics(owner: string, repo: string): Promise<ProjectMetrics> {
     const cacheKey = CacheService.getMetricsKey(owner, repo);
-    
+
     // Try to get from cache first
     const cached = cache.get<ProjectMetrics>(cacheKey);
     if (cached) {
@@ -155,7 +154,7 @@ export class GitHubService {
 
     // Cache the result
     cache.set(cacheKey, metrics);
-    
+
     return metrics;
   }
 
@@ -305,7 +304,7 @@ export class GitHubService {
       // First get the default branch
       const repoData = await this.makeRequest<GitHubRepository>(`/repos/${owner}/${repo}`);
       const defaultBranch = repoData.default_branch || 'main';
-      
+
       // Get the tree recursively
       const response = await this.makeRequest<{ tree: GitHubTreeItem[] }>(`/repos/${owner}/${repo}/git/trees/${defaultBranch}?recursive=1`);
       return response.tree || [];
@@ -319,11 +318,11 @@ export class GitHubService {
    */
   async getFileContent(owner: string, repo: string, path: string): Promise<string> {
     const response = await this.makeRequest<{ content: string; encoding: string }>(`/repos/${owner}/${repo}/contents/${path}`);
-    
+
     if (response.encoding === 'base64') {
       return Buffer.from(response.content, 'base64').toString('utf-8');
     }
-    
+
     return response.content;
   }
 

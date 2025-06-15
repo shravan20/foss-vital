@@ -1,10 +1,6 @@
-/**
- * Enhanced Project service for comprehensive GitHub repository analysis
- */
-
-import type { 
-  Project, 
-  ProjectMetrics, 
+import type {
+  Project,
+  ProjectMetrics,
   ProjectHealth,
   AdvancedProjectAnalysis,
   CICDInfo,
@@ -19,6 +15,11 @@ import { HealthCalculatorService } from './health-calculator.js';
 import { cache, CacheService } from './cache.js';
 
 export class EnhancedProjectService {
+
+  /**
+   * Enhanced Project service for metrics which needs manual GitHub repository analysis
+   */
+
   private githubService: GitHubService;
   private healthCalculator: HealthCalculatorService;
 
@@ -37,7 +38,7 @@ export class EnhancedProjectService {
 
   async getProjectHealth(owner: string, repo: string): Promise<ProjectHealth> {
     const cacheKey = CacheService.getHealthKey(owner, repo);
-    
+
     // Try to get from cache first
     const cached = cache.get<ProjectHealth>(cacheKey);
     if (cached) {
@@ -50,7 +51,7 @@ export class EnhancedProjectService {
 
     // Cache the result
     cache.set(cacheKey, health);
-    
+
     return health;
   }
 
@@ -67,11 +68,11 @@ export class EnhancedProjectService {
   }
 
   /**
-   * Perform comprehensive analysis of a repository without cloning
+   * comprehensive analysis of a repository without cloning
    */
   async getAdvancedAnalysis(owner: string, repo: string): Promise<AdvancedProjectAnalysis> {
     const cacheKey = `advanced:${owner}/${repo}`;
-    
+
     // Try to get from cache first
     const cached = cache.get<AdvancedProjectAnalysis>(cacheKey);
     if (cached) {
@@ -132,8 +133,8 @@ export class EnhancedProjectService {
     };
 
     // Cache the result
-    cache.set(cacheKey, analysis, 1800000); // 30 minutes cache
-    
+    cache.set(cacheKey, analysis);
+
     return analysis;
   }
 
@@ -142,7 +143,7 @@ export class EnhancedProjectService {
    */
   private async analyzeCICD(owner: string, repo: string): Promise<CICDInfo> {
     const cacheKey = CacheService.getCICDKey(owner, repo);
-    
+
     // Try to get from cache first
     const cached = cache.get<CICDInfo>(cacheKey);
     if (cached) {
@@ -150,10 +151,9 @@ export class EnhancedProjectService {
     }
 
     const result = await this.performCICDAnalysis(owner, repo);
-    
-    // Cache with longer TTL (20 minutes) since CI/CD setup changes less frequently
-    cache.set(cacheKey, result, 20 * 60 * 1000);
-    
+
+    cache.set(cacheKey, result, 21600000); // 6 hrs
+
     return result;
   }
 
@@ -197,7 +197,7 @@ export class EnhancedProjectService {
    */
   private async analyzeTesting(owner: string, repo: string): Promise<TestingInfo> {
     const cacheKey = CacheService.getTestingKey(owner, repo);
-    
+
     // Try to get from cache first
     const cached = cache.get<TestingInfo>(cacheKey);
     if (cached) {
@@ -205,10 +205,10 @@ export class EnhancedProjectService {
     }
 
     const result = await this.performTestingAnalysis(owner, repo);
-    
-    // Cache with medium TTL (15 minutes)
-    cache.set(cacheKey, result, 15 * 60 * 1000);
-    
+
+    // Cache with 6 hrs
+    cache.set(cacheKey, result, 21600000);
+
     return result;
   }
 
@@ -218,11 +218,11 @@ export class EnhancedProjectService {
   private async performTestingAnalysis(owner: string, repo: string): Promise<TestingInfo> {
     try {
       const fileTree = await this.githubService.getRepositoryTree(owner, repo);
-      
+
       const testDirs = ['test', 'tests', '__tests__', 'spec', 'specs', 'testing'];
       const testExtensions = ['.test.', '.spec.', '_test.', '_spec.'];
-      
-      const testDirectories = fileTree.filter((file: GitHubTreeItem) => 
+
+      const testDirectories = fileTree.filter((file: GitHubTreeItem) =>
         testDirs.some(dir => file.path.toLowerCase().includes(dir))
       ).map((f: GitHubTreeItem) => f.path);
 
@@ -294,7 +294,7 @@ export class EnhancedProjectService {
    */
   private async analyzeDependencies(owner: string, repo: string): Promise<DependencyInfo> {
     const cacheKey = CacheService.getDependencyKey(owner, repo);
-    
+
     // Try to get from cache first (shorter TTL for dependency analysis)
     const cached = cache.get<DependencyInfo>(cacheKey);
     if (cached) {
@@ -302,10 +302,10 @@ export class EnhancedProjectService {
     }
 
     const result = await this.performDependencyAnalysis(owner, repo);
-    
-    // Cache with shorter TTL (10 minutes) since dependencies change frequently
-    cache.set(cacheKey, result, 10 * 60 * 1000);
-    
+
+    // Cache with 6 hrs
+    cache.set(cacheKey, result, 21600000);
+
     return result;
   }
 
@@ -422,30 +422,30 @@ export class EnhancedProjectService {
   /**
    * Analyze Node.js dependencies
    */
-  private async analyzeNodeDependencies(owner: string, repo: string, existingFiles: string[]): Promise<{total: number, dev: number, manager: string}> {
+  private async analyzeNodeDependencies(owner: string, repo: string, existingFiles: string[]): Promise<{ total: number, dev: number, manager: string }> {
     const packageJson = await this.getFileContent(owner, repo, 'package.json');
-    if (!packageJson) return {total: 0, dev: 0, manager: 'npm'};
+    if (!packageJson) return { total: 0, dev: 0, manager: 'npm' };
 
     try {
       const pkg = JSON.parse(packageJson);
       const totalDeps = Object.keys(pkg.dependencies || {}).length;
       const devDeps = Object.keys(pkg.devDependencies || {}).length;
-      
+
       // Determine package manager
       let manager = 'npm';
       if (existingFiles.includes('yarn.lock')) manager = 'yarn';
       else if (existingFiles.includes('pnpm-lock.yaml')) manager = 'pnpm';
-      
-      return {total: totalDeps, dev: devDeps, manager};
+
+      return { total: totalDeps, dev: devDeps, manager };
     } catch {
-      return {total: 0, dev: 0, manager: 'npm'};
+      return { total: 0, dev: 0, manager: 'npm' };
     }
   }
 
   /**
    * Analyze Python dependencies
    */
-  private async analyzePythonDependencies(owner: string, repo: string, existingFiles: string[]): Promise<{total: number, manager: string}> {
+  private async analyzePythonDependencies(owner: string, repo: string, existingFiles: string[]): Promise<{ total: number, manager: string }> {
     let total = 0;
     let manager = 'pip';
 
@@ -483,73 +483,73 @@ export class EnhancedProjectService {
       }
     }
 
-    return {total, manager};
+    return { total, manager };
   }
 
   /**
    * Analyze Ruby dependencies
    */
-  private async analyzeRubyDependencies(owner: string, repo: string): Promise<{total: number}> {
+  private async analyzeRubyDependencies(owner: string, repo: string): Promise<{ total: number }> {
     const gemfile = await this.getFileContent(owner, repo, 'Gemfile');
-    if (!gemfile) return {total: 0};
+    if (!gemfile) return { total: 0 };
 
     const gemMatches = gemfile.match(/gem\s+['"][\w-]+['"]/g) || [];
-    return {total: gemMatches.length};
+    return { total: gemMatches.length };
   }
 
   /**
    * Analyze Go dependencies
    */
-  private async analyzeGoDependencies(owner: string, repo: string): Promise<{total: number}> {
+  private async analyzeGoDependencies(owner: string, repo: string): Promise<{ total: number }> {
     const goMod = await this.getFileContent(owner, repo, 'go.mod');
-    if (!goMod) return {total: 0};
+    if (!goMod) return { total: 0 };
 
     const requireMatches = goMod.match(/require\s+\(([\s\S]*?)\)/);
     if (requireMatches) {
-      return {total: requireMatches[1].split('\n').filter(line => line.trim() && !line.startsWith('//')).length};
+      return { total: requireMatches[1].split('\n').filter(line => line.trim() && !line.startsWith('//')).length };
     }
-    
+
     const singleRequires = goMod.match(/require\s+[\w\.\-\/]+/g) || [];
-    return {total: singleRequires.length};
+    return { total: singleRequires.length };
   }
 
   /**
    * Analyze Rust dependencies
    */
-  private async analyzeRustDependencies(owner: string, repo: string): Promise<{total: number, dev: number}> {
+  private async analyzeRustDependencies(owner: string, repo: string): Promise<{ total: number, dev: number }> {
     const cargoToml = await this.getFileContent(owner, repo, 'Cargo.toml');
-    if (!cargoToml) return {total: 0, dev: 0};
+    if (!cargoToml) return { total: 0, dev: 0 };
 
     const depsMatch = cargoToml.match(/\[dependencies\]([\s\S]*?)(?=\[|$)/);
     const devDepsMatch = cargoToml.match(/\[dev-dependencies\]([\s\S]*?)(?=\[|$)/);
-    
+
     const totalDeps = depsMatch ? depsMatch[1].split('\n').filter(line => line.trim() && !line.startsWith('#')).length : 0;
     const devDeps = devDepsMatch ? devDepsMatch[1].split('\n').filter(line => line.trim() && !line.startsWith('#')).length : 0;
-    
-    return {total: totalDeps, dev: devDeps};
+
+    return { total: totalDeps, dev: devDeps };
   }
 
   /**
    * Analyze PHP dependencies
    */
-  private async analyzePHPDependencies(owner: string, repo: string): Promise<{total: number, dev: number}> {
+  private async analyzePHPDependencies(owner: string, repo: string): Promise<{ total: number, dev: number }> {
     const composerJson = await this.getFileContent(owner, repo, 'composer.json');
-    if (!composerJson) return {total: 0, dev: 0};
+    if (!composerJson) return { total: 0, dev: 0 };
 
     try {
       const composer = JSON.parse(composerJson);
       const totalDeps = Object.keys(composer.require || {}).length;
       const devDeps = Object.keys(composer['require-dev'] || {}).length;
-      return {total: totalDeps, dev: devDeps};
+      return { total: totalDeps, dev: devDeps };
     } catch {
-      return {total: 0, dev: 0};
+      return { total: 0, dev: 0 };
     }
   }
 
   /**
    * Analyze Java dependencies
    */
-  private async analyzeJavaDependencies(owner: string, repo: string, existingFiles: string[]): Promise<{total: number, manager: string}> {
+  private async analyzeJavaDependencies(owner: string, repo: string, existingFiles: string[]): Promise<{ total: number, manager: string }> {
     let total = 0;
     let manager = 'maven';
 
@@ -575,7 +575,7 @@ export class EnhancedProjectService {
       }
     }
 
-    return {total, manager};
+    return { total, manager };
   }
 
   /**
@@ -583,10 +583,10 @@ export class EnhancedProjectService {
    */
   private async estimateVulnerabilities(totalDeps: number, languages: string[], packageManager: string, dependencyFiles: string[]): Promise<number> {
     if (totalDeps === 0) return 0;
-    
+
     // Base vulnerability rate varies by ecosystem
     let baseRate = 0.05; // 5% default
-    
+
     // Ecosystem-specific vulnerability rates based on historical data
     switch (packageManager.toLowerCase()) {
       case 'npm':
@@ -616,24 +616,24 @@ export class EnhancedProjectService {
         baseRate = 0.04; // Go has good security practices
         break;
     }
-    
+
     // Adjust based on project age indicators
-    const hasLockFiles = dependencyFiles.some(f => 
+    const hasLockFiles = dependencyFiles.some(f =>
       f.includes('lock') || f.includes('yarn.lock') || f.includes('Pipfile.lock')
     );
-    
+
     if (hasLockFiles) {
       baseRate *= 0.8; // Lock files reduce vulnerability risk
     }
-    
+
     // Adjust for project size
     let sizeMultiplier = 1.0;
     if (totalDeps > 100) sizeMultiplier = 1.3;
     else if (totalDeps > 50) sizeMultiplier = 1.1;
     else if (totalDeps < 10) sizeMultiplier = 0.7;
-    
+
     const estimatedVulns = Math.floor(totalDeps * baseRate * sizeMultiplier);
-    
+
     // Add some realistic variance
     const variance = Math.floor(Math.random() * 3) - 1; // -1, 0, or 1
     return Math.max(0, estimatedVulns + variance);
@@ -644,10 +644,10 @@ export class EnhancedProjectService {
    */
   private async estimateOutdatedDependencies(totalDeps: number, languages: string[], packageManager: string): Promise<number> {
     if (totalDeps === 0) return 0;
-    
+
     // Base outdated rate varies by ecosystem maturity and update frequency
     let baseRate = 0.15; // 15% default
-    
+
     switch (packageManager.toLowerCase()) {
       case 'npm':
       case 'yarn':
@@ -676,11 +676,11 @@ export class EnhancedProjectService {
         baseRate = 0.10; // Go ecosystem, very stable
         break;
     }
-    
+
     // Adjust based on total dependencies
     if (totalDeps > 100) baseRate *= 1.2; // Larger projects tend to have more outdated deps
     else if (totalDeps < 20) baseRate *= 0.8;
-    
+
     const estimatedOutdated = Math.floor(totalDeps * baseRate);
     return Math.max(0, estimatedOutdated);
   }
@@ -703,7 +703,7 @@ export class EnhancedProjectService {
     const now = new Date();
     const lastCommit = new Date(recentActivity.lastCommit || now);
     const daysSinceLastCommit = Math.floor((now.getTime() - lastCommit.getTime()) / (1000 * 60 * 60 * 24));
-    
+
     return {
       lastCommit: daysSinceLastCommit === 0 ? 'Today' : daysSinceLastCommit === 1 ? '1d ago' : `${daysSinceLastCommit}d ago`,
       commitsPerWeek: Math.floor(Math.random() * 50 + 10),
@@ -746,15 +746,15 @@ export class EnhancedProjectService {
 
   private calculateOverallHealthScore(health: ProjectHealth, cicd: CICDInfo, testing: TestingInfo, deps: DependencyInfo): any {
     let score = health.overallScore;
-    
+
     // Bonus points for good practices
     if (cicd.hasGitHubActions) score += 5;
     if (testing.hasTests) score += 10;
     if (testing.estimatedCoverage > 70) score += 5;
     if (deps.vulnerabilities === 0) score += 5;
-    
+
     score = Math.min(100, score);
-    
+
     return {
       score,
       status: score >= 90 ? 'Excellent' : score >= 70 ? 'Good' : score >= 50 ? 'Fair' : 'Poor',
@@ -772,7 +772,7 @@ export class EnhancedProjectService {
   private detectTestFrameworks(files: GitHubTreeItem[]): string[] {
     const frameworks = [];
     const content = files.map(f => f.path.toLowerCase()).join(' ');
-    
+
     if (content.includes('jest')) frameworks.push('Jest');
     if (content.includes('mocha')) frameworks.push('Mocha');
     if (content.includes('jasmine')) frameworks.push('Jasmine');
@@ -781,7 +781,7 @@ export class EnhancedProjectService {
     if (content.includes('unittest')) frameworks.push('unittest');
     if (content.includes('rspec')) frameworks.push('RSpec');
     if (content.includes('phpunit')) frameworks.push('PHPUnit');
-    
+
     return frameworks;
   }
 
@@ -790,7 +790,7 @@ export class EnhancedProjectService {
    */
   private estimateTestCoverage(allFiles: GitHubTreeItem[], testFiles: GitHubTreeItem[]): number {
     if (testFiles.length === 0) return 0;
-    
+
     // Filter source files (exclude common non-source files)
     const sourceFiles = allFiles.filter(file => {
       const path = file.path.toLowerCase();
@@ -798,7 +798,7 @@ export class EnhancedProjectService {
       const isInSourceDir = ['src/', 'lib/', 'app/', 'components/', 'pages/', 'utils/', 'services/', 'models/'].some(dir => path.includes(dir));
       const isNotExcluded = !['node_modules/', 'vendor/', 'dist/', 'build/', '.git/', 'coverage/', 'docs/'].some(dir => path.includes(dir));
       const isNotConfigFile = !['package.json', 'tsconfig.json', 'webpack.config.js', 'babel.config.js', '.eslintrc'].some(config => path.includes(config.toLowerCase()));
-      
+
       return isSourceFile && isNotExcluded && isNotConfigFile && (isInSourceDir || path.split('/').length <= 2);
     });
 
@@ -810,36 +810,36 @@ export class EnhancedProjectService {
 
     // Calculate multiple coverage indicators
     const testToSourceRatio = testFiles.length / sourceFiles.length;
-    
+
     // Analyze test file quality indicators
     let qualityMultiplier = 1.0;
-    
+
     // Check for comprehensive test patterns
     const hasDescribeBlocks = testFiles.some(f => f.path.includes('describe') || f.path.includes('context'));
     const hasIntegrationTests = testFiles.some(f => f.path.includes('integration') || f.path.includes('e2e'));
     const hasUnitTests = testFiles.some(f => f.path.includes('unit') || f.path.includes('spec'));
-    
+
     if (hasDescribeBlocks) qualityMultiplier += 0.1;
     if (hasIntegrationTests) qualityMultiplier += 0.15;
     if (hasUnitTests) qualityMultiplier += 0.1;
-    
+
     // Check for test directory structure
     const testDirCount = [...new Set(testFiles.map(f => f.path.split('/')[0]))].length;
     if (testDirCount > 1) qualityMultiplier += 0.1;
-    
+
     // Language-specific adjustments
     const languageBonus = this.getLanguageTestingBonus(sourceFiles, testFiles);
     qualityMultiplier += languageBonus;
-    
+
     // Calculate base coverage from ratio
     let baseCoverage = Math.min(95, testToSourceRatio * 80 + 20);
-    
+
     // Apply quality multiplier
     let finalCoverage = baseCoverage * qualityMultiplier;
-    
+
     // Cap the maximum coverage and add some randomness for realism
     finalCoverage = Math.min(92, Math.max(10, finalCoverage));
-    
+
     return Math.round(finalCoverage);
   }
 
@@ -849,43 +849,43 @@ export class EnhancedProjectService {
   private getLanguageTestingBonus(sourceFiles: GitHubTreeItem[], testFiles: GitHubTreeItem[]): number {
     const languages = this.detectLanguagesFromFiles(sourceFiles);
     let bonus = 0;
-    
+
     // JavaScript/TypeScript - bonus for comprehensive test setup
     if (languages.includes('javascript') || languages.includes('typescript')) {
       const hasJestConfig = testFiles.some(f => f.path.includes('jest'));
       const hasCypressTests = testFiles.some(f => f.path.includes('cypress'));
       const hasPlaywrightTests = testFiles.some(f => f.path.includes('playwright'));
-      
+
       if (hasJestConfig) bonus += 0.1;
       if (hasCypressTests || hasPlaywrightTests) bonus += 0.15;
     }
-    
+
     // Python - bonus for pytest and comprehensive test structure
     if (languages.includes('python')) {
       const hasPytestConfig = testFiles.some(f => f.path.includes('pytest') || f.path.includes('conftest'));
       const hasTestInit = testFiles.some(f => f.path.includes('__init__.py'));
-      
+
       if (hasPytestConfig) bonus += 0.1;
       if (hasTestInit) bonus += 0.05;
     }
-    
+
     // Go - bonus for table-driven tests and benchmarks
     if (languages.includes('go')) {
       const hasTableTests = testFiles.some(f => f.path.includes('_test.go'));
       const hasBenchmarks = testFiles.some(f => f.path.includes('bench'));
-      
+
       if (hasTableTests) bonus += 0.15; // Go has excellent testing patterns
       if (hasBenchmarks) bonus += 0.05;
     }
-    
+
     // Rust - bonus for comprehensive test modules
     if (languages.includes('rust')) {
       const hasLibTests = testFiles.some(f => f.path.includes('lib.rs'));
       const hasModTests = testFiles.some(f => f.path.includes('mod.rs'));
-      
+
       if (hasLibTests || hasModTests) bonus += 0.1;
     }
-    
+
     return Math.min(0.3, bonus); // Cap bonus at 30%
   }
 
@@ -894,7 +894,7 @@ export class EnhancedProjectService {
    */
   private detectLanguagesFromFiles(files: GitHubTreeItem[]): string[] {
     const languages = new Set<string>();
-    
+
     files.forEach(file => {
       const path = file.path.toLowerCase();
       if (path.endsWith('.js') || path.endsWith('.jsx')) languages.add('javascript');
@@ -908,16 +908,16 @@ export class EnhancedProjectService {
       if (path.endsWith('.cpp') || path.endsWith('.c')) languages.add('cpp');
       if (path.endsWith('.cs')) languages.add('csharp');
     });
-    
+
     return Array.from(languages);
   }
 
   private determineBuildStatus(workflowRuns: any[]): 'Passing' | 'Failing' | 'Unknown' {
     if (workflowRuns.length === 0) return 'Unknown';
-    
+
     const recentRuns = workflowRuns.slice(0, 5);
     const successRate = recentRuns.filter(run => run.conclusion === 'success').length / recentRuns.length;
-    
+
     return successRate > 0.7 ? 'Passing' : 'Failing';
   }
 
@@ -931,7 +931,7 @@ export class EnhancedProjectService {
       '.buildkite/pipeline.yml',
       '.gitlab-ci.yml'
     ];
-    
+
     return await this.checkMultipleFiles(owner, repo, ciFiles);
   }
 
@@ -946,7 +946,7 @@ export class EnhancedProjectService {
         }
       })
     );
-    
+
     return results
       .filter(result => result.status === 'fulfilled' && result.value !== null)
       .map(result => (result as PromiseFulfilledResult<string>).value);
@@ -964,7 +964,7 @@ export class EnhancedProjectService {
     try {
       const languages = await this.githubService.getLanguages(owner, repo);
       const total = Object.values(languages).reduce((sum: number, bytes: any) => sum + bytes, 0);
-      
+
       return Object.entries(languages).map(([name, bytes]: [string, any]) => ({
         name,
         bytes,
