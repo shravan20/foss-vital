@@ -54,7 +54,7 @@ export interface GitHubIssue {
 
 export class GitHubService {
   /**
-   * GitHub service for fetching project data with caching and authentication
+   * GitHub service for fetching project data with caching
    */
   private readonly baseUrl: string;
   private readonly token?: string;
@@ -64,14 +64,14 @@ export class GitHubService {
     this.baseUrl = appConfig.github.apiUrl;
     this.token = appConfig.github.token;
     this.isAuthenticated = !!this.token;
-    
+
     // Log authentication status (without exposing the token)
     if (this.isAuthenticated) {
       logger.info('GitHub service initialized with authentication token');
     } else {
       logger.warn('GitHub service initialized without authentication token - rate limits will be lower');
     }
-    
+
     // Validate token format if provided
     if (this.token && !this.isValidTokenFormat(this.token)) {
       logger.error('Invalid GitHub token format detected');
@@ -92,21 +92,21 @@ export class GitHubService {
 
   public getAuthenticationStatus(): { isAuthenticated: boolean; tokenType?: string; rateLimitInfo?: string } {
     if (!this.isAuthenticated) {
-      return { 
-        isAuthenticated: false, 
+      return {
+        isAuthenticated: false,
         rateLimitInfo: 'Unauthenticated requests: 60 requests per hour per IP'
       };
     }
-    
+
     let tokenType = 'classic';
     if (this.token?.startsWith('ghp_')) {
       tokenType = 'personal_access_token';
     } else if (this.token?.startsWith('ghs_')) {
       tokenType = 'github_app';
     }
-    
-    return { 
-      isAuthenticated: true, 
+
+    return {
+      isAuthenticated: true,
       tokenType,
       rateLimitInfo: 'Authenticated requests: 5000 requests per hour'
     };
@@ -123,6 +123,7 @@ export class GitHubService {
         headers['Authorization'] = `token ${this.token}`;
       }
 
+<<<<<<< HEAD
       try {
         const response = await fetch(`${this.baseUrl}${endpoint}`, { headers });
 
@@ -132,7 +133,7 @@ export class GitHubService {
         // Enhanced error handling
         if (!response.ok) {
           const errorBody = await response.text().catch(() => 'Unknown error');
-          
+
           // Log different types of authentication errors
           if (response.status === 401) {
             logger.error(`GitHub API authentication failed: ${response.status} ${response.statusText}`, {
@@ -144,7 +145,7 @@ export class GitHubService {
           } else if (response.status === 403) {
             const rateLimitRemaining = response.headers.get('x-ratelimit-remaining');
             const rateLimitReset = response.headers.get('x-ratelimit-reset');
-            
+
             if (rateLimitRemaining === '0') {
               const resetTime = rateLimitReset ? new Date(parseInt(rateLimitReset) * 1000).toISOString() : 'unknown';
               logger.warn(`GitHub API rate limit exceeded. Reset time: ${resetTime}`, {
@@ -174,7 +175,7 @@ export class GitHubService {
           // Re-throw our custom GitHub API errors
           throw error;
         }
-        
+
         // Handle network errors
         logger.error('Network error while calling GitHub API', {
           endpoint,
@@ -182,6 +183,18 @@ export class GitHubService {
         });
         throw new Error(`Network error while calling GitHub API: ${error instanceof Error ? error.message : 'Unknown error'}`);
       }
+=======
+      const response = await fetch(`${this.baseUrl}${endpoint}`, { headers });
+
+      // Update rate limiter with response headers
+      rateLimiter.updateFromHeaders(Object.fromEntries(response.headers.entries()));
+
+      if (!response.ok) {
+        throw new Error(`GitHub API error: ${response.status} ${response.statusText}`);
+      }
+
+      return response.json();
+>>>>>>> 2688ceb9e683e39ebb0ecfa6af0d09eb746c65b0
     });
   }
 
