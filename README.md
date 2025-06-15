@@ -6,13 +6,33 @@ Your FOSS project's health report - A clean, simple API for fetching GitHub repo
 
 ## Features
 
-- **Fast & Reliable**: Built with Express.js and TypeScript
+- **GitHub Integration**: Fetch project data from GitHub API
 - **Health Scoring**: Comprehensive project health calculation
 - **Smart Caching**: In-memory caching with TTL to minimize GitHub API calls
-- **No Database**: Simple deployment with no database dependencies
 - **Rich Metrics**: Fetch detailed project metrics from GitHub API
 - **REST API**: Clean, documented API endpoints
 - **Easy Deployment**: One-click deployment to Vercel
+- **Open Source**: MIT licensed, free for all
+
+## Roadmap
+
+- [x] GitHub integration
+- [x] Health scoring
+- [x] In memory caching
+- [x] REST API
+- [x] One-click deployment
+- [ ] Cache with Free Cloudflare Cache
+- [ ] Documentation
+- [ ] Visual indicators with Icons, colors, and gradients that reflect project status - Needs improvements
+- [ ] Gitlab integration
+- [ ] More Insights (will add in discussions sections for the same)
+- [ ] UI dashboard to preview the project health and metrics
+- [ ] Add theming to the dashboard ([ref](https://github.com/shravan20/github-readme-quotes/tree/main/src/themes))
+- [ ] Apply different fonts to theming optionally taking it as input from the user
+- [ ] Add more layouts to preview the dashboard
+- [ ] Github Action Integration to use our API and provide static UI instead of dynamically fetching everytime
+- [ ] Allow users to selectively retrieve specific metric categories using query parameters
+- [ ] Add support for detecting additional frameworks, platforms, and toolchains across diverse ecosystems
 
 ## Quick Start
 
@@ -50,9 +70,7 @@ The API will be available at `http://localhost:3000`
 | `/api/health/cache/stats` | GET | Cache statistics |
 | `/api/rate-limit/status` | GET |  GitHub API rate limit status |
 
-### Dynamic Features
-
-#### Advanced Project Analysis
+### Metrics considered
 
 - **Language-agnostic analysis** - Supports JavaScript, Python, Ruby, Go, Rust, PHP, Java, and more
 - **CI/CD detection** - GitHub Actions, Travis CI, CircleCI, Jenkins
@@ -61,25 +79,19 @@ The API will be available at `http://localhost:3000`
 - **Dependency analysis** - package.json, requirements.txt, Gemfile, go.mod, Cargo.toml, etc.
 - **Security vulnerability estimation** - Based on dependency analysis
 - **Test coverage estimation** - Heuristic analysis of test files vs source files
-
-#### Dynamic SVG Cards
-
-- **Real-time data** - All metrics fetched live from GitHub API
-- **Adaptive styling** - Colors and indicators change based on actual project health
-- **Comprehensive metrics** - 20+ different project health indicators
-- **Visual indicators** - Icons, colors, and gradients that reflect project status
+- **Pulls live data** – Uses fresh info directly from GitHub
 
 ## Example Usage
 
 ```bash
 # Get project information
-curl "https://your-deployment.vercel.app/api/projects/facebook/react"
+curl "https://your-deployment.vercel.app/api/projects/shravan20/github-readme-quotes"
 
 # Get project health score
-curl "https://your-deployment.vercel.app/api/health/facebook/react"
+curl "https://your-deployment.vercel.app/api/health/shravan20/github-readme-quotes"
 
 # Get complete project data with health
-curl "https://your-deployment.vercel.app/api/projects/facebook/react/complete"
+curl "https://your-deployment.vercel.app/api/projects/shravan20/github-readme-quotes/complete"
 ```
 
 ## Health Scoring Algorithm
@@ -109,18 +121,24 @@ Environment variables:
 ```text
 api/
 ├── index.ts                 # Main API handler for Vercel
+├── routes
+│       └── projects.ts      # project routes
+│       └── health.ts        # health check routes
+│       └── api.ts           # general routes
 src/
 ├── config/
-│   └── app.ts              # Application configuration
+│   └── app.ts               # Application configuration
 ├── models/
-│   └── project.ts          # Project data models
+│   └── project.ts           # Project data models
 ├── services/
-│   ├── cache.ts            # In-memory caching service
-│   ├── github.ts           # GitHub API integration
-│   ├── project.ts          # Project orchestration service
+│   ├── cache.ts             # In-memory caching service
+│   ├── github.ts            # GitHub API integration
+│   ├── project.ts           # Project orchestration service
+│   ├── project-enhanced.ts  # Custom Project metrics service
 │   └── health-calculator.ts # Health scoring algorithm
 └── utils/
-    └── logger.ts           # Logging utility
+│   ├── rater-limiter.ts     # GitHub API rate limiter utility to ensure rate-limit breaches are not exceeded
+    └── logger.ts            # Logging utility
 ```
 
 ## Deployment
