@@ -1,14 +1,8 @@
-import { promisify } from 'util';
-import { exec } from 'child_process';
 import * as fs from 'fs/promises';
 import * as path from 'path';
-import https from 'https';
-import { createWriteStream } from 'fs';
-import { pipeline } from 'stream';
+import git from 'isomorphic-git';
+import http from 'isomorphic-git/http/node/index.js';
 import { cache, CacheService } from './cache.js';
-
-const execAsync = promisify(exec);
-const pipelineAsync = promisify(pipeline);
 
 export interface ClonedRepositoryAnalysis {
   cicdInfo: {
@@ -48,123 +42,17 @@ export interface ClonedRepositoryAnalysis {
 }
 
 export class RepositoryCloneService {
-  private readonly tmpDir = '/tmp/foss-vital-clones';
+  private readonly repoDir = path.join(process.cwd(), 'cloned-repos');
 
   constructor() {
-    this.ensureTmpDir();
+    this.ensureRepoDir();
   }
 
-  private async ensureTmpDir(): Promise<void> {
+  private async ensureRepoDir(): Promise<void> {
     try {
-      await fs.mkdir(this.tmpDir, { recursive: true });
+      await fs.mkdir(this.repoDir, { recursive: true });
     } catch {
       // Directory already exists
-    }
-  }
-
-  private async ensureGitAvailable(): Promise<void> {
-    try {
-      // Check if git is already available
-      await execAsync('git --version');
-      return;
-    } catch (error) {
-      // Git not found, try to install it
-      console.log('Git not found, attempting to install...');
-      
-      try {
-        // Check if we're in a Vercel environment
-        if (process.env.VERCEL === '1' || process.env.NOW_REGION) {
-          // In Vercel, try to install git using apt-get
-          await execAsync('apt-get update -qq && apt-get install -y git');
-          console.log('Git installed successfully in Vercel environment');
-        } else {
-          // Local environment - provide helpful error
-          throw new Error('Git is not installed. Please install git on your system to use repository cloning features.');
-        }
-      } catch (installError) {
-        // If installation fails, throw a more descriptive error
-        throw new Error(`Git installation failed: ${installError instanceof Error ? installError.message : 'Unknown error'}. Repository cloning features are not available.`);
-      }
-    }
-  }
-
-  /**
-   * Download repository as ZIP file (alternative to git clone)
-   */
-  private async downloadRepositoryZip(owner: string, repo: string, destinationPath: string): Promise<void> {
-    const zipUrl = `https://github.com/${owner}/${repo}/archive/refs/heads/main.zip`;
-    const zipPath = path.join(this.tmpDir, `${owner}-${repo}.zip`);
-
-    try {
-      // Download the ZIP file
-      await this.downloadFile(zipUrl, zipPath);
-
-      // Extract the ZIP file
-      await this.extractZip(zipPath, destinationPath);
-
-      // Cleanup ZIP file
-      await fs.unlink(zipPath);
-    } catch (error) {
-      // Try with 'master' branch if 'main' fails
-      const masterZipUrl = `https://github.com/${owner}/${repo}/archive/refs/heads/master.zip`;
-      try {
-        await this.downloadFile(masterZipUrl, zipPath);
-        await this.extractZip(zipPath, destinationPath);
-        await fs.unlink(zipPath);
-      } catch (masterError) {
-        throw new Error(`Failed to download repository ${owner}/${repo}: ${error instanceof Error ? error.message : 'Unknown error'}`);
-      }
-    }
-  }
-
-  /**
-   * Download a file from URL
-   */
-  private async downloadFile(url: string, destinationPath: string): Promise<void> {
-    return new Promise((resolve, reject) => {
-      const file = createWriteStream(destinationPath);
-      https.get(url, (response) => {
-        if (response.statusCode === 302 || response.statusCode === 301) {
-          // Handle redirect
-          const redirectUrl = response.headers.location;
-          if (redirectUrl) {
-            this.downloadFile(redirectUrl, destinationPath).then(resolve).catch(reject);
-            return;
-          }
-        }
-        
-        if (response.statusCode !== 200) {
-          reject(new Error(`HTTP ${response.statusCode}: ${response.statusMessage}`));
-          return;
-        }
-
-        pipelineAsync(response, file)
-          .then(() => resolve())
-          .catch(reject);
-      }).on('error', reject);
-    });
-  }
-
-  /**
-   * Extract ZIP file (basic implementation for repositories)
-   */
-  private async extractZip(zipPath: string, destinationPath: string): Promise<void> {
-    try {
-      // Use unzip if available (most Linux systems)
-      await execAsync(`unzip -q "${zipPath}" -d "${path.dirname(destinationPath)}"`);
-      
-      // Find the extracted directory (usually repo-name-main or repo-name-master)
-      const parentDir = path.dirname(destinationPath);
-      const files = await fs.readdir(parentDir);
-      const extractedDir = files.find(f => f.includes('-main') || f.includes('-master'));
-      
-      if (extractedDir) {
-        const extractedPath = path.join(parentDir, extractedDir);
-        // Rename to expected path
-        await execAsync(`mv "${extractedPath}" "${destinationPath}"`);
-      }
-    } catch (error) {
-      throw new Error(`Failed to extract ZIP file: ${error instanceof Error ? error.message : 'Unknown error'}`);
     }
   }
 
@@ -177,18 +65,11 @@ export class RepositoryCloneService {
       return cached;
     }
 
-    const repoPath = path.join(this.tmpDir, `${owner}-${repo}-${Date.now()}`);
+    const repoPath = path.join(this.repoDir, `${owner}-${repo}`);
 
     try {
-      // Try git clone first, fallback to ZIP download
-      try {
-        await this.ensureGitAvailable();
-        const cloneUrl = `https://github.com/${owner}/${repo}.git`;
-        await execAsync(`git clone --depth 1 --single-branch ${cloneUrl} "${repoPath}"`);
-      } catch (gitError) {
-        console.log('Git clone failed, falling back to ZIP download...');
-        await this.downloadRepositoryZip(owner, repo, repoPath);
-      }
+      // Clone or update repository using isomorphic-git
+      await this.cloneOrUpdateRepository(owner, repo, repoPath);
 
       // Analyze the cloned repository
       const analysis = await this.performLocalAnalysis(repoPath);
@@ -198,8 +79,54 @@ export class RepositoryCloneService {
 
       return analysis;
     } finally {
-      // Always cleanup the cloned repository
-      await this.cleanup(repoPath);
+      // Optionally cleanup the cloned repository (comment out to keep repos cached)
+      // await this.cleanup(repoPath);
+    }
+  }
+
+  private async cloneOrUpdateRepository(owner: string, repo: string, repoPath: string): Promise<void> {
+    const repoUrl = `https://github.com/${owner}/${repo}`;
+
+    try {
+      // Check if repository already exists
+      const gitDir = path.join(repoPath, '.git');
+      const exists = await fs.access(gitDir).then(() => true).catch(() => false);
+
+      if (exists) {
+        // Repository exists, try to pull latest changes
+        try {
+          await git.pull({
+            fs,
+            http,
+            dir: repoPath,
+            author: {
+              name: 'foss-vital',
+              email: 'foss-vital@example.com'
+            }
+          });
+          console.log(`Updated repository ${owner}/${repo}`);
+          return;
+        } catch (pullError) {
+          // If pull fails, remove and re-clone
+          console.log(`Pull failed for ${owner}/${repo}, re-cloning...`);
+          await this.cleanup(repoPath);
+        }
+      }
+
+      // Clone the repository
+      console.log(`Cloning repository ${owner}/${repo}...`);
+      await git.clone({
+        fs,
+        http,
+        dir: repoPath,
+        url: repoUrl,
+        depth: 1,
+        singleBranch: true
+      });
+      console.log(`Successfully cloned ${owner}/${repo}`);
+
+    } catch (error) {
+      throw new Error(`Failed to clone repository ${owner}/${repo}: ${error instanceof Error ? error.message : 'Unknown error'}`);
     }
   }
 
@@ -759,7 +686,7 @@ export class RepositoryCloneService {
 
   private async cleanup(repoPath: string): Promise<void> {
     try {
-      await execAsync(`rm -rf "${repoPath}"`);
+      await fs.rm(repoPath, { recursive: true, force: true });
     } catch {
       // Cleanup failed, but we don't want to throw an error
       console.warn(`Failed to cleanup repository at ${repoPath}`);

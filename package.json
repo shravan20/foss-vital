@@ -5,7 +5,6 @@
   "type": "module",
   "scripts": {
     "dev": "concurrently \"tsc --watch\" \"nodemon --watch dist --exec node dist/api/index.js\"",
-    "prebuild": "echo 'Checking git installation...' && git --version || echo 'Git not found, will be installed during deployment'",
     "build": "tsc",
     "start": "node dist/api/index.js",
     "deploy": "vercel --prod",
@@ -14,12 +13,14 @@
   "dependencies": {
     "cors": "^2.8.5",
     "dotenv": "^16.5.0",
-    "express": "^4.19.2"
+    "express": "^4.19.2",
+    "http": "^0.0.1-security",
+    "isomorphic-git": "^1.32.1"
   },
   "devDependencies": {
     "@types/cors": "^2.8.17",
     "@types/express": "^4.17.21",
-    "@types/node": "^20.11.17",
+    "@types/node": "^20.19.4",
     "@vercel/node": "^3.2.29",
     "concurrently": "^9.1.2",
     "nodemon": "^3.1.10",
