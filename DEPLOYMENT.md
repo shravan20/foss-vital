@@ -2,6 +2,14 @@
 
 This guide covers deploying FOSS Vital to various platforms.
 
+## Prerequisites
+
+FOSS Vital requires the following to be available in the deployment environment:
+
+- **Node.js** (version 20.x or later)
+- **Git** (for clone-based repository analysis)
+- **Write access** to temporary directories (for repository clones)
+
 ## Quick Deploy to Vercel (Recommended)
 
 ### One-Click Deploy
@@ -19,7 +27,8 @@ This guide covers deploying FOSS Vital to various platforms.
    - Vercel will automatically detect the configuration
 
 3. **Configure Environment Variables** (Optional but recommended):
-   ```
+
+   ```env
    GITHUB_TOKEN=your_github_personal_access_token
    NODE_ENV=production
    ```
