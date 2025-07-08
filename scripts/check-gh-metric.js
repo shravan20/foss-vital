@@ -1,7 +1,3 @@
-/**
- * Test script to demonstrate enhanced FOSS Vital features
- */
-
 import fetch from 'node-fetch';
 import { logger } from '../src/utils/logger.js';
 

@@ -17,6 +17,7 @@ Your FOSS project's health report as README card!
 - **GitHub Integration**: Fetch project data from GitHub API
 - **Health Scoring**: Comprehensive project health calculation
 - **Smart Caching**: In-memory caching with TTL to minimize GitHub API calls
+- **Optimized Analysis**: Clone-based file validation with 7-day caching for enhanced performance
 - **Rich Metrics**: Fetch detailed project metrics from GitHub API
 - **REST API**: Clean, documented API endpoints
 - **Easy Deployment**: One-click deployment to Vercel
@@ -89,6 +90,26 @@ The API will be available at `http://localhost:3000`
 - **Test coverage estimation** - Heuristic analysis of test files vs source files
 - **Pulls live data** – Uses fresh info directly from GitHub
 
+### Performance Optimization
+
+**Clone-Based Analysis**: For metrics requiring file validation, FOSS Vital now uses an optimized clone-based approach instead of individual GitHub API calls:
+
+- **Temporary Repository Cloning**: Performs a shallow clone (`--depth 1`) of the repository to a temporary directory
+- **Local File Analysis**: Analyzes files locally for CI/CD configs, testing setups, linting configs, and dependencies
+- **Comprehensive Parsing**: Parses dependency files (package.json, requirements.txt, etc.) to get accurate dependency counts
+- **7-Day Caching**: Results are cached for 7 days to minimize repeated clones
+- **Automatic Cleanup**: Temporary repositories are automatically removed after analysis
+- **Significant Performance Improvement**: Reduces API calls from potentially hundreds to just a few per repository
+
+This optimization applies to:
+
+- CI/CD configuration detection
+- Testing framework and file analysis
+- Linting configuration detection
+- Dependency analysis and parsing
+
+Basic repository information and activity metrics still use the GitHub API for real-time data.
+
 ## Example Usage
 
 ```bash
@@ -142,7 +163,8 @@ src/
 │   ├── cache.ts             # In-memory caching service
 │   ├── github.ts            # GitHub API integration
 │   ├── project.ts           # Project orchestration service
-│   ├── project-enhanced.ts  # Custom Project metrics service
+│   ├── project-enhanced.ts  # Enhanced project metrics service
+│   ├── repository-clone.ts  # Clone-based repository analysis service (NEW)
 │   └── health-calculator.ts # Health scoring algorithm
 └── utils/
 │   ├── rater-limiter.ts     # GitHub API rate limiter utility to ensure rate-limit breaches are not exceeded
