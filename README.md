@@ -57,7 +57,7 @@ Overall score is a weighted average of these dimensions (0-100).
 
 ## What We Analyze
 
-## 🔧 Feature Support Matrix
+## Feature Support Matrix
 
 | Category             | Supported Tools / Languages                                                                 |
 |----------------------|----------------------------------------------------------------------------------------------|
@@ -93,7 +93,7 @@ curl "https://your-deployment.vercel.app/api/health/owner/repo"
 curl "https://your-deployment.vercel.app/api/projects/owner/repo/complete"
 ```
 
-## Configuration
+## Configuration / Env Variables
 
 | Variable | Default | Description |
 |----------|---------|-------------|
@@ -120,4 +120,4 @@ Read [CONTRIBUTING.md](CONTRIBUTING.md) for detailed guidelines.
 
 ## License
 
-MIT License - see [LICENSE](LICENSE) file for details.
+[MIT License](LICENSE)
