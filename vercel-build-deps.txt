@@ -1,0 +1,4 @@
+# Vercel Build Hook
+# This file tells Vercel to install git as a system dependency
+
+git

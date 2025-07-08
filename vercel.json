@@ -1,8 +1,12 @@
 {
   "version": 2,
+  "buildCommand": "npm run build",
+  "installCommand": "npm install && (command -v git >/dev/null 2>&1 || (echo 'Installing git...' && apt-get update -qq && apt-get install -y git > /dev/null 2>&1))",
   "functions": {
     "api/index.ts": {
-      "runtime": "@vercel/node@3.0.22"
+      "runtime": "@vercel/node@3.0.22",
+      "includeFiles": "src/**",
+      "maxDuration": 30
     }
   },
   "routes": [
@@ -18,5 +22,8 @@
       "src": "/",
       "dest": "/api/index.ts"
     }
-  ]
+  ],
+  "env": {
+    "NODE_ENV": "production"
+  }
 }

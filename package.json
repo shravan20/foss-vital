@@ -5,6 +5,7 @@
   "type": "module",
   "scripts": {
     "dev": "concurrently \"tsc --watch\" \"nodemon --watch dist --exec node dist/api/index.js\"",
+    "prebuild": "echo 'Checking git installation...' && git --version || echo 'Git not found, will be installed during deployment'",
     "build": "tsc",
     "start": "node dist/api/index.js",
     "deploy": "vercel --prod",
