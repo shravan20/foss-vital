@@ -262,6 +262,7 @@ export class RepositoryCloneService {
       }
     }
 
+    // TODO: Add patterns other CI-CD tools or file names
     return {
       hasGitHubActions: foundFiles.some(f => f.includes('.github/workflows')),
       hasTravisCI: foundFiles.includes('.travis.yml'),
