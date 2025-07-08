@@ -42,9 +42,15 @@ export interface ClonedRepositoryAnalysis {
 }
 
 export class RepositoryCloneService {
-  private readonly repoDir = path.join(process.cwd(), 'cloned-repos');
+  private readonly repoDir: string;
 
   constructor() {
+    // Use /tmp directory for serverless environments (Vercel, AWS Lambda, etc.)
+    // or fallback to local cloned-repos directory for development
+    this.repoDir = process.env.VERCEL || process.env.AWS_LAMBDA_FUNCTION_NAME || process.env.LAMBDA_TASK_ROOT
+      ? path.join('/tmp', 'cloned-repos')
+      : path.join(process.cwd(), 'cloned-repos');
+    
     this.ensureRepoDir();
   }
 
@@ -78,9 +84,57 @@ export class RepositoryCloneService {
       cache.set(cacheKey, analysis, 7 * 24 * 60 * 60 * 1000);
 
       return analysis;
+    } catch (error) {
+      console.error(`Failed to analyze repository ${owner}/${repo}:`, error);
+      
+      // Return a basic analysis structure when cloning fails
+      const fallbackAnalysis: ClonedRepositoryAnalysis = {
+        cicdInfo: {
+          hasGitHubActions: false,
+          hasTravisCI: false,
+          hasCircleCI: false,
+          hasJenkins: false,
+          hasOther: false,
+          buildStatus: 'Unknown',
+          workflows: []
+        },
+        testingInfo: {
+          hasTests: false,
+          testDirectories: [],
+          testFiles: 0,
+          testFrameworks: [],
+          estimatedCoverage: 0
+        },
+        lintingInfo: {
+          hasESLint: false,
+          hasPylint: false,
+          hasPrettier: false,
+          hasRubocop: false,
+          hasGolangci: false,
+          hasOther: [],
+          configFiles: []
+        },
+        dependencyInfo: {
+          packageManager: 'Unknown',
+          totalDependencies: 0,
+          devDependencies: 0,
+          outdatedDependencies: 0,
+          vulnerabilities: 0,
+          dependencyFiles: [],
+          detectedLanguages: []
+        }
+      };
+
+      // Cache the fallback for a shorter period (1 hour)
+      cache.set(cacheKey, fallbackAnalysis, 60 * 60 * 1000);
+      
+      return fallbackAnalysis;
     } finally {
-      // Optionally cleanup the cloned repository (comment out to keep repos cached)
-      // await this.cleanup(repoPath);
+      // Always cleanup in serverless environments to save space
+      // Keep repos cached only in development
+      if (process.env.VERCEL || process.env.AWS_LAMBDA_FUNCTION_NAME || process.env.LAMBDA_TASK_ROOT) {
+        await this.cleanup(repoPath);
+      }
     }
   }
 
@@ -88,6 +142,9 @@ export class RepositoryCloneService {
     const repoUrl = `https://github.com/${owner}/${repo}`;
 
     try {
+      // Ensure the parent directory exists
+      await fs.mkdir(path.dirname(repoPath), { recursive: true });
+
       // Check if repository already exists
       const gitDir = path.join(repoPath, '.git');
       const exists = await fs.access(gitDir).then(() => true).catch(() => false);
@@ -95,7 +152,7 @@ export class RepositoryCloneService {
       if (exists) {
         // Repository exists, try to pull latest changes
         try {
-          await git.pull({
+          const pullPromise = git.pull({
             fs,
             http,
             dir: repoPath,
@@ -104,6 +161,15 @@ export class RepositoryCloneService {
               email: 'foss-vital@example.com'
             }
           });
+
+          // Add timeout for pull operation (30 seconds)
+          await Promise.race([
+            pullPromise,
+            new Promise((_, reject) => 
+              setTimeout(() => reject(new Error('Pull timeout')), 30000)
+            )
+          ]);
+
           console.log(`Updated repository ${owner}/${repo}`);
           return;
         } catch (pullError) {
@@ -113,9 +179,10 @@ export class RepositoryCloneService {
         }
       }
 
-      // Clone the repository
+      // Clone the repository with timeout
       console.log(`Cloning repository ${owner}/${repo}...`);
-      await git.clone({
+      
+      const clonePromise = git.clone({
         fs,
         http,
         dir: repoPath,
@@ -123,9 +190,23 @@ export class RepositoryCloneService {
         depth: 1,
         singleBranch: true
       });
+
+      // Add timeout for clone operation (60 seconds)
+      await Promise.race([
+        clonePromise,
+        new Promise((_, reject) => 
+          setTimeout(() => reject(new Error('Clone timeout')), 60000)
+        )
+      ]);
+
       console.log(`Successfully cloned ${owner}/${repo}`);
 
     } catch (error) {
+      console.error(`Clone error for ${owner}/${repo}:`, error);
+      
+      // Cleanup any partial clone
+      await this.cleanup(repoPath);
+      
       throw new Error(`Failed to clone repository ${owner}/${repo}: ${error instanceof Error ? error.message : 'Unknown error'}`);
     }
   }
@@ -686,10 +767,15 @@ export class RepositoryCloneService {
 
   private async cleanup(repoPath: string): Promise<void> {
     try {
-      await fs.rm(repoPath, { recursive: true, force: true });
-    } catch {
+      // Check if path exists before attempting cleanup
+      const exists = await fs.access(repoPath).then(() => true).catch(() => false);
+      if (exists) {
+        await fs.rm(repoPath, { recursive: true, force: true });
+        console.log(`Cleaned up repository at ${repoPath}`);
+      }
+    } catch (error) {
       // Cleanup failed, but we don't want to throw an error
-      console.warn(`Failed to cleanup repository at ${repoPath}`);
+      console.warn(`Failed to cleanup repository at ${repoPath}:`, error);
     }
   }
 }
