@@ -44,17 +44,6 @@ npm run dev
 
 API will be available at `http://localhost:3000`
 
-## API Endpoints
-
-| Endpoint | Description |
-|----------|-------------|
-| `/api/projects/:owner/:repo` | Basic project information |
-| `/api/projects/:owner/:repo/complete` | Project with health score |
-| `/api/projects/:owner/:repo/metrics` | Detailed project metrics |
-| `/api/projects/:owner/:repo/analysis` | Comprehensive analysis |
-| `/api/health/:owner/:repo` | Health score only |
-| `/api/health/:owner/:repo/refresh` | Force refresh cache |
-
 ## Health Scoring
 
 Projects are scored across four key areas:
@@ -64,35 +53,21 @@ Projects are scored across four key areas:
 - **Maintenance (25%)** - Issue close rate, PR merge rate  
 - **Documentation (20%)** - README, LICENSE, contributing guides
 
-Overall score is weighted average of these dimensions (0-100).
+Overall score is a weighted average of these dimensions (0-100).
 
 ## What We Analyze
 
-### Language Support
+## 🔧 Feature Support Matrix
 
-JavaScript, Python, Ruby, Go, Rust, PHP, Java, and more
+| Category             | Supported Tools / Languages                                                                 |
+|----------------------|----------------------------------------------------------------------------------------------|
+| **Language Support** | JavaScript, Python, Ruby, Go, Rust, PHP, Java, and more                                     |
+| **CI/CD Detection**  | GitHub Actions, Travis CI, CircleCI, Jenkins                                                 |
+| **Testing Frameworks** | Jest, Mocha, PyTest, RSpec, PHPUnit, etc.                                                 |
+| **Linting Tools**    | ESLint, Pylint, Prettier, RuboCop, golangci-lint                                             |
+| **Dependency Analysis** | `package.json`, `requirements.txt`, `Gemfile`, `go.mod`, `Cargo.toml`, etc.            |
+| **Security & Coverage** | - Vulnerability estimation based on dependencies  <br> - Test coverage via heuristics <br> - Live data from GitHub API |
 
-### CI/CD Detection
-
-GitHub Actions, Travis CI, CircleCI, Jenkins
-
-### Testing Frameworks
-
-Jest, Mocha, PyTest, RSpec, PHPUnit, etc.
-
-### Linting Tools
-
-ESLint, Pylint, Prettier, RuboCop, golangci-lint
-
-### Dependency Analysis
-
-package.json, requirements.txt, Gemfile, go.mod, Cargo.toml, etc.
-
-### Security & Coverage
-
-- Vulnerability estimation based on dependencies
-- Test coverage estimation via heuristic analysis
-- Live data from GitHub API
 
 ## Performance Features
 
