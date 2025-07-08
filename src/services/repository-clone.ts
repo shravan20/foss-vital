@@ -45,9 +45,9 @@ export class RepositoryCloneService {
   private readonly repoDir: string;
 
   constructor() {
-    // Use /tmp directory for serverless environments (Vercel, AWS Lambda, etc.)
-    // or fallback to local cloned-repos directory for development
-    this.repoDir = process.env.VERCEL || process.env.AWS_LAMBDA_FUNCTION_NAME || process.env.LAMBDA_TASK_ROOT
+    // Use /tmp directory for serverless environments (Vercel)
+    // or local cloned-repos directory for development
+    this.repoDir = process.env.VERCEL
       ? path.join('/tmp', 'cloned-repos')
       : path.join(process.cwd(), 'cloned-repos');
     
@@ -132,7 +132,7 @@ export class RepositoryCloneService {
     } finally {
       // Always cleanup in serverless environments to save space
       // Keep repos cached only in development
-      if (process.env.VERCEL || process.env.AWS_LAMBDA_FUNCTION_NAME || process.env.LAMBDA_TASK_ROOT) {
+      if (process.env.VERCEL) {
         await this.cleanup(repoPath);
       }
     }
