@@ -28,7 +28,6 @@
 - Smart caching system to minimize API calls
 - REST API with multiple endpoints
 - One-click Vercel deployment
-- MIT licensed
 
 ## Quick Start
 
